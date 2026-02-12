@@ -1,0 +1,120 @@
+[
+    {
+        "session_id": "english_77",
+        "queries": [
+            {
+                "query_id": "english_77:0",
+                "query": "I just got off the phone with the embassy and my heart is sinking. They said even with expedited processing, it's not guaranteed we'll make it in time. My kids are asking every day when we're leaving to see their grandparents, and I don't know what to tell them anymore. The pressure is crushing me.",
+                "category": "Emotional Support"
+            },
+            {
+                "query_id": "english_77:1",
+                "query": "Every time I look at the calendar, I feel a knot in my stomach. One month. That's all we have. My spouse is trying to stay strong, but I see the worry in their eyes too. We've packed and unpacked our suitcases three times just to feel like we're doing *something*. I just need to get this fear off my chest.",
+                "category": "Emotional Support"
+            },
+            {
+                "query_id": "english_77:2",
+                "query": "A friend just posted pictures from Berlin, and I burst into tears. It felt so stupid, but it just hit me all at once—what if we're not there next month? What if all our plans, telling the family in Germany we're coming... what if it all falls apart? I'm so scared of letting everyone down.",
+                "category": "Emotional Support"
+            },
+            {
+                "query_id": "english_77:3",
+                "query": "I had a dream last night that we arrived at the airport and our passports were blank. No visas. We just stood there while our flight boarded. Woke up in a panic and couldn't get back to sleep. The uncertainty is eating me alive. Just needed to tell someone.",
+                "category": "Emotional Support"
+            },
+            {
+                "query_id": "english_77:4",
+                "query": "My youngest drew a picture of an airplane today and asked if it was the one taking us to Oma and Opa. I had to say 'I hope so,' and the look on their face... It's the hope that's the hardest part. Keeping it up for them while inside I'm just a mess of nerves about these papers from Tehran.",
+                "category": "Emotional Support"
+            }
+        ],
+        "conversation": [
+            {
+                "role": "user",
+                "text": "edit: \nWow, I was shocked. I really didn't know these regulations. This issue creates a serious challenge for me and my family. Because we have to be in Germany in a month at most, while if I want to apply from the German embassy in Tehran for a new visa, it will take at least three to four months and maybe more. Please, if possible, help us to get our visa out of the expired state. It is very critical for us.\n"
+            },
+            {
+                "role": "assistant",
+                "text": "I was taken aback by the regulations surrounding visa expiration. I had no idea that this could cause such a challenge for me and my family. We need to be in Germany in just a month's time, but if I need to apply for a new visa from the German embassy in Tehran, it could take three to four months, or even longer. It is critical for us to get our visa renewed as soon as possible. If there is any way to assist us with this, please let us know."
+            },
+            {
+                "role": "user",
+                "text": "again?"
+            },
+            {
+                "role": "assistant",
+                "text": "I was surprised to learn about the strict regulations surrounding visa expiration. This has become a significant challenge for my family and me as we need to be in Germany within a month. Unfortunately, if I were to apply for a new visa from the German embassy in Tehran, it could take up to four months or longer to obtain it. I am appealing for assistance to help us resolve this issue and get our visa renewed as soon as possible, as it is crucial for our travel plans."
+            },
+            {
+                "role": "user",
+                "text": "again? "
+            },
+            {
+                "role": "assistant",
+                "text": "I was completely caught off guard by the rules regarding visa expiration. My family and I need to travel to Germany in a month, but if I must apply for a new visa from the German embassy in Tehran, it could take at least three to four months, or longer to process. This is creating a significant challenge for us, and we urgently need help to address this issue and renew our visa. It is imperative that we obtain our visa in time for our travel plans. Any assistance to expedite this process would be greatly appreciated."
+            },
+            {
+                "role": "user",
+                "text": "edit: Wow, I was shocked. I really didn't know these regulations. This issue will create  a serious challenge for me and my family. Because we have to be in Germany in a month at most, while if I want to apply from the German embassy in Tehran for a new visa, it will take at least three to four months and maybe more. Please, if possible, help us to get our visa out of the expired state. It is very critical for us."
+            },
+            {
+                "role": "assistant",
+                "text": "Wow, I was taken aback by the strict regulations surrounding visa expiration. This issue has become a significant challenge for my family and me, as we must be in Germany within a month. Unfortunately, if I apply for a new visa from the German embassy in Tehran, it may take up to three to four months, or possibly longer, to process. We desperately need assistance to resolve this issue and renew our visa as soon as possible. It is critical for our travel plans, and any help to expedite the process would be greatly appreciated."
+            },
+            {
+                "role": "user",
+                "text": "edit: It is critical for us, and any help to resolve this issue would be greatly appreciated."
+            },
+            {
+                "role": "assistant",
+                "text": "It is absolutely critical for my family and me to get our visa renewed before our travel plans. Any assistance to resolve this issue would be greatly appreciated."
+            },
+            {
+                "role": "user",
+                "text": "edit: it is  absolutely critical for us, and any help in this regard  would be greatly appreciated."
+            },
+            {
+                "role": "assistant",
+                "text": "It is absolutely essential for my family and me to renew our visa before our scheduled travel. Any help in this regard would be greatly appreciated."
+            }
+        ],
+        "extracted_memory": [
+            {
+                "label": "Plans/Schedule",
+                "value": "Must travel to Germany within 1 month",
+                "evidence": {
+                    "session_id": "sess_3932f15755d0",
+                    "utterance_index": 0,
+                    "text": "Because we have to be in Germany in a month at most"
+                }
+            },
+            {
+                "label": "UNMAPPED",
+                "value": "Applying for visas via German embassy in Tehran",
+                "evidence": {
+                    "session_id": "sess_3932f15755d0",
+                    "utterance_index": 0,
+                    "text": "if I want to apply from the German embassy in Tehran for a new visa"
+                }
+            },
+            {
+                "label": "Social_Relationships/Family",
+                "value": "Traveling with family",
+                "evidence": {
+                    "session_id": "sess_3932f15755d0",
+                    "utterance_index": 0,
+                    "text": "This issue creates a serious challenge for me and my family"
+                }
+            },
+            {
+                "label": "Thoughts/Goals/Short_Term",
+                "value": "Urgently resolve visa expiration to meet travel deadline",
+                "evidence": {
+                    "session_id": "sess_3932f15755d0",
+                    "utterance_index": 6,
+                    "text": "Please, if possible, help us to get our visa out of the expired state. It is very critical for us."
+                }
+            }
+        ]
+    }
+]
