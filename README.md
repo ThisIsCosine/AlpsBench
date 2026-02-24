@@ -1,15 +1,10 @@
 # AlpsBench: A Benchmark for Realistic Personalized Memory Systems
 
-## 🚧 Dataset Availability: Coming Soon
+## 🚧 Dataset Availability
 
-**The full AlpsBench dataset is currently under internal review.**
+The full AlpsBench dataset is now available on HuggingFace: https://huggingface.co/datasets/Cosineyx/Alpsbench
 
-Due to the **GitHub platform's strict file size limitations and storage quotas** regarding large-scale benchmarks, we are currently encountering upload restrictions that prevent hosting the full dataset directly. We are actively resolving these platform-specific technical issues and setting up an alternative hosting solution to ensure stable access. We expect to release the download link in the near future.
-
-Thank you for your patience and understanding.
-
-
-## � Task Examples & Directory Structure
+##  Task Examples & Directory Structure
 
 While the full data is being prepared, we provide illustrative samples for each core task in the `examples/` directory.
 
