@@ -6,6 +6,8 @@ import numpy as np
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from sentence_transformers import SentenceTransformer, util
+import argparse
+import os
 
 # 确保能导入 src
 sys.path.append(os.getcwd())
@@ -14,10 +16,11 @@ from src.agents.shared import iter_jsonl, list_jsonl_files, ensure_dir, append_j
 from src.agents.task3_memory_retrieval.curator import Task3Grader
 
 # ================= 配置区域 =================
-INPUT_FILE = r"data/task3_dataset_d1000.jsonl"
-OUTPUT_DIR = r"runs/task3_d1000_vector_results"
-EMBEDDING_MODEL = 'all-MiniLM-L6-v2' 
-MAX_WORKERS = 12  
+DEFAULT_DATA_PATH = r"data/task3"
+DEFAULT_DISTRACTORS = 1000
+DEFAULT_OUTPUT_DIR = r"runs/task3_vector_results"
+DEFAULT_EMBEDDING_MODEL = 'all-MiniLM-L6-v2' 
+DEFAULT_MAX_WORKERS = 12  
 # ===============================================
 
 def run_vector_retrieval(probe, model, model_name="vector_sim"):
@@ -99,38 +102,47 @@ def process_pipeline(entry, model, grader, api_config):
     }
 
 def main():
-    ensure_dir(OUTPUT_DIR)
+    parser = argparse.ArgumentParser(description="Run Task 3 Vector Similarity Retrieval Baseline")
+    parser.add_argument("--distractors", type=int, default=DEFAULT_DISTRACTORS, help="Number of distractors (e.g., 100, 300, 1000)")
+    parser.add_argument("--data_path", type=str, default=DEFAULT_DATA_PATH, help="Base directory for task 3 data")
+    parser.add_argument("--output_dir", type=str, default=DEFAULT_OUTPUT_DIR, help="Base directory to save results")
+    parser.add_argument("--model", type=str, default=DEFAULT_EMBEDDING_MODEL, help="Embedding model name from sentence-transformers")
+    parser.add_argument("--workers", type=int, default=DEFAULT_MAX_WORKERS, help="Max parallel workers")
+    args = parser.parse_args()
+
+    input_file = os.path.join(args.data_path, f"task3_dataset_d{args.distractors}.jsonl")
+    final_output_dir = f"{args.output_dir}_d{args.distractors}"
+    ensure_dir(final_output_dir)
     config_path = "configs/api.json"
     api_config = {}
     if os.path.exists(config_path):
         with open(config_path, "r", encoding="utf-8") as f:
             api_config = json.load(f)
 
-    print(f"Loading Embedding Model: {EMBEDDING_MODEL} ...")
-    # 加载模型 (在主进程加载，传入线程使用)
-    embed_model = SentenceTransformer(EMBEDDING_MODEL)
+    print(f"Loading Embedding Model: {args.model} ...")
+    embed_model = SentenceTransformer(args.model)
     print("Model loaded.")
 
     grader = Task3Grader()
     
-    output_file = os.path.join(OUTPUT_DIR, "scored_vector.jsonl")
+    output_file = os.path.join(final_output_dir, "scored_vector.jsonl")
     if os.path.exists(output_file):
         os.remove(output_file)
 
     entries = []
     # 收集所有数据文件
-    file_list = list_jsonl_files(INPUT_FILE) if os.path.isdir(INPUT_FILE) else [INPUT_FILE]
+    file_list = list_jsonl_files(input_file) if os.path.isdir(input_file) else [input_file]
     for path in file_list:
         for ent in iter_jsonl(path):
             entries.append(ent)
     
-    print(f"Loaded {len(entries)} entries. Processing with vectors in parallel (Workers={MAX_WORKERS})...")
+    print(f"Loaded {len(entries)} entries. Processing with vectors in parallel (Workers={args.workers})...")
     
     results = []
     lock = threading.Lock()
 
     # 使用 ThreadPoolExecutor 进行并行处理
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with ThreadPoolExecutor(max_workers=args.workers) as executor:
         # 提交任务
         futures = {
             executor.submit(process_pipeline, ent, embed_model, grader, api_config): ent 
@@ -158,7 +170,7 @@ def main():
 
     count = len(results)
     if count > 0:
-        print(f"\nVector Model ({EMBEDDING_MODEL}) Accuracy: {hits / count:.2%} ({hits}/{count})")
+        print(f"\nVector Model ({args.mode}) Accuracy: {hits / count:.2%} ({hits}/{count})")
     else:
         print("\nNo valid results.")
         

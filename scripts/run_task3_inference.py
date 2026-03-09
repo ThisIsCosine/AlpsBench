@@ -3,6 +3,7 @@ import os
 import sys
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import argparse
 
 # 确保能导入 src
 sys.path.append(os.getcwd())
@@ -18,18 +19,11 @@ from src.agents.task3_memory_retrieval.curator import Task3Grader
 
 # ================= 用户配置区域 =================
 # 1. 输入数据文件 (由 run_task3_distractor 生成的最终数据集)
-INPUT_FILE = r"data/task3_dataset_d1000.jsonl"
-
-# 2. 设置评测模型
-MODEL_LIST = ["meta-llama/llama-4-maverick"] 
-
-# 3. 结果输出目录
-OUTPUT_DIR = r"runs/task3_d1000_results_llama-4-mavericktoken_consume"
-
-# 4. 并发线程数
-MAX_WORKERS = 100
-
-# 5. Grader 配置 (参照 curator 逻辑，通常使用规则匹配快速打分，use_llm=False)
+DEFAULT_DATA_PATH = r"data/task3/"
+DEFAULT_DISTRACTORS = 100
+DEFAULT_MODEL = "gpt-4o"
+DEFAULT_OUTPUT_DIR = r"runs/task3_results"
+DEFAULT_MAX_WORKERS = 100
 USE_LLM_JUDGE = True
 # ===============================================
 
@@ -40,8 +34,6 @@ def process_pipeline(entry, evaluator, grader, model_list, api_config):
     2. Evaluator -> Model Output (Selection)
     3. Grader -> Score (Accuracy)
     """
-    # 1. 提取 Probe
-    # Task 3 数据集的结构通常是 {"seed_id": "...", "record": { "query":..., "candidate_memories":... }}
     probe = entry.get("record", {})
     if not probe:
         # 兼容旧格式或直接 probe 列表
@@ -52,9 +44,6 @@ def process_pipeline(entry, evaluator, grader, model_list, api_config):
         print("no candidite")
         return {"entry": entry, "error": "invalid_format_missing_fields"}
 
-    # 2. 运行模型 (Evaluator)
-    # evaluate_models 返回 report
-    # 参照 curator.py 中的调用方式:
     try:
         report = evaluator.evaluate_models(
             probe,
@@ -67,9 +56,6 @@ def process_pipeline(entry, evaluator, grader, model_list, api_config):
     except Exception as e:
         return {"entry": entry, "error": f"evaluator_failed: {str(e)}"}
     
-    # 3. 运行评分 (Grader)
-    # 参照 curator.py 中的调用方式:
-    # score = grader.score_report(probe, report, use_llm=False, api_config=local_api_config)
     try:
         score = grader.score_report(
             probe,
@@ -88,7 +74,22 @@ def process_pipeline(entry, evaluator, grader, model_list, api_config):
     }
 
 def main():
-    ensure_dir(OUTPUT_DIR)
+
+
+    parser = argparse.ArgumentParser(description="Run Task 3 Full Pipeline (Evaluate + Grade)")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help="Model to evaluate")
+    parser.add_argument("--distractors", type=int, default=DEFAULT_DISTRACTORS, help="Number of distractors (e.g., 100, 300, 1000)")
+    parser.add_argument("--data_path", type=str, default=DEFAULT_DATA_PATH, help="Base directory for task 3 data")
+    parser.add_argument("--output_dir", type=str, default=DEFAULT_OUTPUT_DIR, help="Base output directory")
+    parser.add_argument("--workers", type=int, default=DEFAULT_MAX_WORKERS, help="Max parallel workers")
+    args = parser.parse_args()
+
+    model_list = [args.model]
+
+    input_file = os.path.join(args.data_path, f"task3_dataset_d{args.distractors}.jsonl")
+    final_output_dir = f"{args.output_dir}_d{args.distractors}_{model_list[0]}"
+
+    ensure_dir(final_output_dir)
     config_path = "configs/api.json"
     
     print(f"Loading config from {config_path}...")
@@ -101,8 +102,9 @@ def main():
 
     print("="*60)
     print("Starting Task 3 Full Pipeline (Evaluate + Grade)")
-    print(f"Input: {INPUT_FILE}")
-    print(f"Models: {MODEL_LIST}")
+    print(f"Input: {input_file}")
+    print(f"Models: {model_list}")
+    print(f"Distractors: {args.distractors}")
     print("="*60)
 
     evaluator = Task3Evaluator()
@@ -110,27 +112,26 @@ def main():
 
     # 加载所有数据
     entries = []
-    if os.path.isfile(INPUT_FILE):
-        paths = [INPUT_FILE]
-    elif os.path.isdir(INPUT_FILE):
-        paths = list_jsonl_files(INPUT_FILE)
+    if os.path.isfile(input_file):
+        paths = [input_file]
+    elif os.path.isdir(input_file):
+        paths = list_jsonl_files(input_file)
     else:
-        print(f"Error: Input path {INPUT_FILE} not found.")
+        print(f"Error: Input path {input_file} not found. Ensure the dataset for d{args.distractors} exists.")
         return
         
     for path in paths:
         for ent in iter_jsonl(path):
             entries.append(ent)
             
-    print(f"Loaded {len(entries)} entries. Processing with {MAX_WORKERS} workers...")
+    print(f"Loaded {len(entries)} entries. Processing with {args.workers} workers...")
     
     output_filename = f"scored.jsonl"
-    output_file = os.path.join(OUTPUT_DIR, output_filename)
+    output_file = os.path.join(final_output_dir, output_filename)
     
     if os.path.exists(output_file):
         print("exist files")
         return
-        # os.remove(output_file)
         
     lock = threading.Lock()
     results = [] 
@@ -141,13 +142,11 @@ def main():
             if "error" not in res:
                 results.append(res)
             else:
-                # 可以选择记录错误日志
                 pass
 
-    # 并行执行
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
+    with ThreadPoolExecutor(max_workers=args.workers) as executor:
         futures = {
-            executor.submit(process_pipeline, ent, evaluator, grader, MODEL_LIST, api_config): ent 
+            executor.submit(process_pipeline, ent, evaluator, grader, model_list, api_config): ent 
             for ent in entries
         }
         
@@ -178,8 +177,7 @@ def print_summary(results):
             model_name = run.get("model", "unknown")
             judge_info = run.get("judge", {})
             
-            # Task 3 Grader 返回的 judge 结构: {"used_memory": bool, "score": float, ...}
-            # score 通常是 0.0 或 1.0 (overlap score) 或 [0,1]
+
             score_val = judge_info.get("score", 0.0)
             
             if model_name not in model_stats: 
@@ -187,7 +185,7 @@ def print_summary(results):
             
             model_stats[model_name]["total_score"] += score_val
             model_stats[model_name]["count"] += 1
-            if score_val > 0.5: # 简单的 Accuracy 阈值
+            if score_val > 0.5: 
                 model_stats[model_name]["hits"] += 1
             
     print("\n=== Evaluation Summary ===")

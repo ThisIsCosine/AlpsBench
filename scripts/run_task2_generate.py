@@ -17,7 +17,7 @@ run_task2_from_jsonl_dir(
     eval_call_model=None,
     max_samples=10000,
     max_attempts_per_seed=10,
-    generator_model_id='gpt-5.21111',
+    generator_model_id='gpt-5.2',
     api_config=cfg
 )
 print("after run")

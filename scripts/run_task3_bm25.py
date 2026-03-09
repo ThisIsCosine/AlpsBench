@@ -7,11 +7,15 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import numpy as np
 from rank_bm25 import BM25Okapi
 
-# === 新增 NLTK 相关库 ===
+import argparse
+import os
+
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
+
+
 
 # === NLTK 资源初始化 (自动下载) ===
 try:
@@ -45,9 +49,10 @@ from src.agents.shared import iter_jsonl, list_jsonl_files, ensure_dir, append_j
 from src.agents.task3_memory_retrieval.curator import Task3Grader
 
 # ================= 配置区域 =================
-INPUT_FILE = r"data/task3_dataset_d700.jsonl"
-OUTPUT_DIR = r"runs/task3_d700_bm25_results"
-MAX_WORKERS = 50 
+DEFAULT_DATA_PATH = r"data/task3"
+DEFAULT_DISTRACTORS = 700
+DEFAULT_OUTPUT_DIR = r"runs/task3_bm25_results"
+DEFAULT_MAX_WORKERS = 50
 # ===============================================
 
 def nltk_tokenize(text):
@@ -79,9 +84,6 @@ def nltk_tokenize(text):
     return processed_tokens
 
 def run_bm25_retrieval(probe, model_name="bm25"):
-    """
-    模拟 Evaluator 的行为，但在内部使用 BM25 进行检索
-    """
     query = probe.get("query", "")
     candidates = probe.get("candidate_memories", [])
     
@@ -105,17 +107,12 @@ def run_bm25_retrieval(probe, model_name="bm25"):
     tokenized_corpus = [nltk_tokenize(doc) for doc in corpus_texts]
     tokenized_query = nltk_tokenize(query)
 
-    # Note: 假如 query 被清洗成空列表了 (比如 query 全是停用词 'The is a'), 
-    # BM25Okapi 可能会报错或返回全0。做一个简单的 fallback。
     if not tokenized_query:
-        # 回退到简单分词以免崩溃
         tokenized_query = str(query).lower().split()
 
-    # 3. BM25 计算
     bm25 = BM25Okapi(tokenized_corpus)
     scores = bm25.get_scores(tokenized_query)
     
-    # 4. 获取最佳匹配
     best_idx = np.argmax(scores)
     best_score = scores[best_idx]
     best_memory = valid_candidates[best_idx]
@@ -131,8 +128,6 @@ def run_bm25_retrieval(probe, model_name="bm25"):
         "runs": [run_result]
     }
 
-# ... 后面的 process_pipeline 和 main 函数保持不变 ...
-# ...existing code...
 def process_pipeline(entry, grader, api_config):
     probe = entry.get("record", {})
     if not probe: probe = entry 
@@ -140,7 +135,6 @@ def process_pipeline(entry, grader, api_config):
     if "query" not in probe or "candidate_memories" not in probe:
         return {"entry": entry, "error": "invalid_format"}
 
-    # === 替换点：使用 BM25 替代 LLM ===
     try:
         report = run_bm25_retrieval(probe, model_name="bm25_nltk")
         # print(report)
@@ -161,6 +155,16 @@ def process_pipeline(entry, grader, api_config):
     return {"entry": entry, "report": report, "score": score}
 
 def main():
+    parser = argparse.ArgumentParser(description="Run Task 3 BM25 Retrieval Baseline")
+    parser.add_argument("--distractors", type=int, default=DEFAULT_DISTRACTORS, help="Number of distractors (e.g., 100, 300, 1000)")
+    parser.add_argument("--data_path", type=str, default=DEFAULT_DATA_PATH, help="Base directory for task 3 data")
+    parser.add_argument("--output_dir", type=str, default=DEFAULT_OUTPUT_DIR, help="Base directory to save results")
+    parser.add_argument("--workers", type=int, default=DEFAULT_MAX_WORKERS, help="Max parallel workers")
+    args = parser.parse_args()
+
+    INPUT_FILE = os.path.join(args.data_path, f"task3_dataset_d{args.distractors}.jsonl")
+    OUTPUT_DIR = f"{args.output_dir}_d{args.distractors}"
+    MAX_WORKERS = args.workers
     ensure_dir(OUTPUT_DIR)
     config_path = "configs/api.json"
     api_config = {}
