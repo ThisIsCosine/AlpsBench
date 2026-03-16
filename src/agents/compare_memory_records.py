@@ -647,27 +647,15 @@ def build_llm_judge_from_config(
     timeout = int(cfg.get("timeout", 60))
 
     def judge(payload: Dict[str, Any]) -> Dict[str, Any]:
-        system = (
-            "You are a strict judge for memory extraction quality.\n"
-            "Important limitation: you do NOT see the original dialogue here, only gold vs predicted memory items.\n"
-            "Therefore, DO NOT assume that every 'extra' predicted item is a hallucination.\n"
-            "For extra items, set hallucinated=true ONLY if the item is clearly wrong even without dialogue (e.g., not about the user,\n"
-            "internally contradictory/nonsensical, or obviously incompatible with the gold set). Otherwise set hallucinated=false and keep severity low.\n"
-            "Return ONLY valid JSON that strictly follows this template:\n"
-            "{\n"
-            "  \"pair_reviews\": [\n"
-            "    {\"gold_id\": \"...\", \"pred_id\": \"...\", \"ok\": true, \"error_type\": \"EQUIVALENT\", \"severity\": 0, \"rationale\": \"...\"}\n"
-            "  ],\n"
-            "  \"missing_reviews\": [\n"
-            "    {\"id\": \"...\", \"should_have_extracted\": true, \"severity\": 2, \"rationale\": \"...\"}\n"
-            "  ],\n"
-            "  \"extra_reviews\": [\n"
-            "    {\"id\": \"...\", \"hallucinated\": true, \"severity\": 2, \"rationale\": \"...\"}\n"
-            "  ]\n"
-            "}\n"
-            "Valid error_type values: EQUIVALENT, VALUE_DRIFT, HALLUCINATION, LABEL_WRONG, TYPE_WRONG, OVERGENERAL, UNDERGENERAL, OTHER.\n"
-            "Do NOT include any extra keys, commentary, or markdown."
-        )
+        # System Prompt Logic Outline:
+        # 1. Role: Acts as a strict judge evaluating memory extraction quality.
+        # 2. Constraint: Since raw dialogues are unavailable, the model conservatively assesses whether extra items 
+        #    are obvious hallucinations and checks matched pairs for meaning deviations (e.g., VALUE_DRIFT).
+        # 3. Format Strictness: Forces the model to output ONLY pure JSON. The output must strictly include 
+        #    three arrays: 'pair_reviews', 'missing_reviews', and 'extra_reviews', with no markdown or extra text.
+
+        # Here are examples
+        system = ("You are a strict judge for memory extraction quality. Output ONLY valid JSON containing pair_reviews, missing_reviews, and extra_reviews without markdown.")
         user = (
             "Evaluate the following payload and output JSON only.\n"
             f"{json.dumps(payload, ensure_ascii=False)}"

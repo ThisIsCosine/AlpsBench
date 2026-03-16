@@ -15,23 +15,20 @@ from ..compare_memory_records import score_records, build_llm_judge_from_config
 from .generator import Task1Generator
 from .evaluator import Task1Evaluator
 
+# Task 1 Curator Prompts Logic Outline:
+# 1. Role: Acts as the Task 1 Curator evaluating the quality of memory extraction probes.
+# 2. Decision Making: Decides whether to ACCEPT, REWRITE, or DISCARD a probe based on its 
+#    clarity and whether the expected output is scorable.
+# 3. Format Strictness: Enforces strictly JSON output. The LLM must return a JSON object containing:
+#    - 'probe_id': Identifier for the current probe.
+#    - 'verdict': Must be one of "ACCEPT", "REWRITE", or "DISCARD".
+#    - 'reasons': A list of reasons mapped to the verdict.
+#    - 'feedback_for_generator': Specific feedback instruction if "REWRITE" is chosen.
 
-TASK1_CURATOR_PROMPT = """SYSTEM:
-You are Task 1 Curator. Decide whether to accept, rewrite, or discard a memory
-extraction probe based on clarity and scorable output.
-Return JSON only.
-"""
+# Here are examples
+TASK1_CURATOR_PROMPT = "You are Task 1 Curator. Output valid JSON to ACCEPT, REWRITE, or DISCARD the probe based on clarity."
 
-TASK1_CURATOR_LLM_PROMPT = """SYSTEM:
-You are Task 1 Curator. Review the probe and return JSON only:
-{
-  "probe_id": "string",
-  "verdict": "ACCEPT|REWRITE|DISCARD",
-  "reasons": ["..."],
-  "feedback_for_generator": "string"
-}
-If invalid or ambiguous, choose REWRITE with specific feedback.
-"""
+TASK1_CURATOR_LLM_PROMPT = "You are Task 1 Curator. Review the probe and return JSON only"
 
 
 class Task1Curator:

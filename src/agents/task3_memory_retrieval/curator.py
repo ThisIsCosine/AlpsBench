@@ -37,66 +37,20 @@ def _sanitize_memory_item(m: Dict[str, Any], include_label: bool) -> Dict[str, A
         item["label"] = m.get("label")
     return item
 
+# Task 3 Curator & Auditor Prompts Logic Outline:
+# 1. Curator Role: Evaluates if the generated response successfully utilized the selected memory based on its reasoning.
+#    - Format: Strictly returns JSON containing 'used_memory' (boolean), 'score' (float [0,1]), and 'reason' (string).
+# 2. Auditor Role: Uses semantic reasoning to audit the generated query for quality and fairness.
+#    - Hard Check (Leakage): Fails if the query contains distinctive phrases from the memory value/evidence that give away the answer.
+#    - Soft Checks: Evaluates if the query has a concrete entity target and strictly depends on the selected memory.
+#    - Format: Strictly returns JSON detailing 'leakage' dict, boolean flags, 'reasons' list, and 'feedback_for_generator'.
 
-TASK3_CURATOR_PROMPT = """SYSTEM:
-You are Task 3 Curator. Score whether the model used the selected memory based on its reason.
-Return JSON only:
-{
-  "used_memory": true|false,
-  "score": 0.0,
-  "reason": "string"
-}
-Score in [0,1].
-"""
+# Here are prompt examples
 
-TASK3_CURATOR_AUDIT_PROMPT = """SYSTEM:
-You are Task 3 Curator Auditor. Use semantic judgment (reasoning), not string heuristics.
-Do NOT use casing-based rules or regex heuristics. Judge by meaning.
+TASK3_CURATOR_PROMPT = "You are Task 3 Curator. Score whether the model used the selected memory. Output JSON only."
 
-You will receive:
-- query
-- selected_memory.value
-- selected_memory.evidence_text
+TASK3_CURATOR_AUDIT_PROMPT = "You are Task 3 Curator Auditor. Judge query leakage and memory dependency. Output JSON only."
 
-Define leakage ONLY as: the query reveals the answer by including distinctive content from selected_memory.value
-or selected_memory.evidence_text (near-verbatim or uniquely identifying phrases).
-Do NOT treat generic slot/type words as leakage.
-
-Hard check:
-A) Leakage (hard):
-- Leaky if the query includes distinctive phrase/value from selected_memory.value/evidence_text
-  that would make the answer obvious, OR otherwise gives away the key named entity/value.
-- Not leaky to mention slot/type words (university/chair/group/unit/affiliation/institution/etc.).
-- Notice: answer contains memory is CORRECT; query contains exact answer is INCORRECT.
--- eg. Q: Did he graduate from USC? A: USC --> INCORRECT
---    Q: WHICH university did he graduate from? A: USC --> CORRECT
-
-Soft checks (advisory only):
-B) has_entity_target: asks for a concrete retrievable fact/entity.
-C) depends_on_selected_memory: cannot be answered correctly without this memory (not guessable/common).
-   should consider multi-hop reasoning or logical deduction to answer the query. Low requirements. 
-
-Return JSON only:
-{
-  "leakage": {"is_leaky": true|false, "leaked_items": ["..."], "evidence_from_query": "string"},
-  "has_entity_target": true|false,
-  "depends_on_selected_memory": true|false,
-  "reasons": ["..."],
-  "feedback_for_generator": "string"
-}
-
-Rules:
-- If you mark is_leaky=true, you MUST provide evidence_from_query as an exact snippet copied from query.
-- If you cannot cite an exact snippet from query, set is_leaky=false.
-- If is_virtual_world is true, explain why in 'reasons'.
-
-Feedback format:
-- feedback should directly guide to generate a good query
-- 2-3 short bullet points separated by "\\n- " starting with "- ".
-- Do NOT demand verbatim quoting or strict word counts.
-
-Now audit the current probe and output JSON only.
-"""
 
 
 class Task3Judger:

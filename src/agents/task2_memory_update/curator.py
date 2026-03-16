@@ -4,7 +4,7 @@ Task 2 Curator: Scores the model output against expected output.
 
 from typing import Any, Dict, List
 from ..compare_memory_records import score_records,build_llm_judge_from_config
-# yx: add judge by llm
+
 class Task2Curator:
     def score(
             self, gold_record: Dict[str, Any], 
