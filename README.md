@@ -2,7 +2,7 @@
 
 
 
-[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B)](https://arxiv.org/abs/placeholder) [![Project](https://img.shields.io/badge/Project_Page-Link-blue)](https://misshsiaoo.github.io/Alps_Bench/) [![Data](https://img.shields.io/badge/🤗HuggingFace-Link-FFA500)](https://huggingface.co/datasets/Cosineyx/Alpsbench)
+[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B)](https://arxiv.org/pdf/2603.26680) [![Project](https://img.shields.io/badge/Project_Page-Link-blue)](https://misshsiaoo.github.io/Alps_Bench/) [![Data](https://img.shields.io/badge/🤗HuggingFace-Link-FFA500)](https://huggingface.co/datasets/Cosineyx/Alpsbench)
 
 We present <img src="figures/alps_new.png" alt="Logo" width="34"/> **AlpsBench**, an LLM PerSonalization benchmark derived from real-world human–LLM dialogues. While existing benchmarks rely heavily on synthetic dialogues that exhibit a distribution gap from real-world conversations, AlpsBench bridges this gap by comprising 2,500 long-term interaction sequences curated from WildChat. These are paired with human-verified structured memories that encapsulate both explicit and implicit personalization signals.
 
