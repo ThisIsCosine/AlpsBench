@@ -291,7 +291,7 @@ AlpsBench/
   docs/
     usage.md
     data.md
-    evaluation_matrix.md
+    evaluation_metric.md
     metrics.md
     prediction_contract.md
     leaderboard.md

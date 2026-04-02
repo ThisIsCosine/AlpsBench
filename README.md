@@ -36,7 +36,7 @@ If you are new to AlpsBench, the fastest reading order is:
 
 1. [docs/usage.md](docs/usage.md)
 2. [docs/prediction_contract.md](docs/prediction_contract.md)
-3. [docs/evaluation_matrix.md](docs/evaluation_matrix.md)
+3. [docs/evaluation_metric.md](docs/evaluation_metric.md)
 
 ## 🧭 Benchmark Design
 
@@ -115,9 +115,9 @@ python scripts/evaluate.py --task task4 --ability ability2 --split test --predic
 
 For `test`, the evaluator writes `predictions.jsonl` and `summary.json` but does not score locally because no public references are available.
 
-For `examples`, `dev`, and `validation`, `scripts/evaluate.py` returns public local proxy scores for self-checking and debugging. These local scores are useful for format validation and iteration, but they are not identical to the full benchmark-side reporting used in the paper and leaderboard. See [docs/metrics.md](docs/metrics.md) and [docs/evaluation_matrix.md](docs/evaluation_matrix.md) for the task-by-task scoring surface.
+For `examples`, `dev`, and `validation`, `scripts/evaluate.py` returns public local proxy scores for self-checking and debugging. These local scores are useful for format validation and iteration, but they are not identical to the full benchmark-side reporting used in the paper and leaderboard. See [docs/metrics.md](docs/metrics.md) and [docs/evaluation_metric.md](docs/evaluation_metric.md) for the task-by-task scoring surface.
 
-**Evaluation note.** To preserve blind evaluation integrity, we do not fully release benchmark-side judge prompts or hidden scoring details. The public task logic, prediction contract, and local evaluation surface are documented in [docs/evaluation_matrix.md](docs/evaluation_matrix.md) and related docs.
+**Evaluation note.** To preserve blind evaluation integrity, we do not fully release benchmark-side judge prompts or hidden scoring details. The public task logic, prediction contract, and local evaluation surface are documented in [docs/evaluation_metric.md](docs/evaluation_metric.md) and related docs.
 
 ## 🔌 Adapter Workflow
 
@@ -239,7 +239,7 @@ Maintainer-oriented commands:
 - [docs/prediction_contract.md](docs/prediction_contract.md)
 - [docs/data.md](docs/data.md)
 - [docs/metrics.md](docs/metrics.md)
-- [docs/evaluation_matrix.md](docs/evaluation_matrix.md)
+- [docs/evaluation_metric.md](docs/evaluation_metric.md)
 - [docs/leaderboard.md](docs/leaderboard.md)
 - [docs/repository_structure.md](docs/repository_structure.md)
 - [docs/implementation_blueprint.md](docs/implementation_blueprint.md)
