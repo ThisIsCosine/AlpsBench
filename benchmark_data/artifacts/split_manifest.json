@@ -1,0 +1,84 @@
+{
+  "status": "ok",
+  "source_split": "dev",
+  "hash_salt": "alpsbench-public-split-v1",
+  "weights": {
+    "dev": 1,
+    "validation": 1,
+    "test": 3
+  },
+  "tracks": {
+    "task1": {
+      "source_rows": 2330,
+      "dev_rows": 466,
+      "validation_rows": 466,
+      "test_rows": 1398
+    },
+    "task2": {
+      "source_rows": 2345,
+      "dev_rows": 469,
+      "validation_rows": 469,
+      "test_rows": 1407
+    },
+    "task3_d100": {
+      "source_rows": 2381,
+      "dev_rows": 476,
+      "validation_rows": 476,
+      "test_rows": 1429
+    },
+    "task3_d300": {
+      "source_rows": 2381,
+      "dev_rows": 476,
+      "validation_rows": 476,
+      "test_rows": 1429
+    },
+    "task3_d500": {
+      "source_rows": 2381,
+      "dev_rows": 476,
+      "validation_rows": 476,
+      "test_rows": 1429
+    },
+    "task3_d700": {
+      "source_rows": 2381,
+      "dev_rows": 476,
+      "validation_rows": 476,
+      "test_rows": 1429
+    },
+    "task3_d1000": {
+      "source_rows": 2381,
+      "dev_rows": 476,
+      "validation_rows": 476,
+      "test_rows": 1429
+    },
+    "task4_ability1": {
+      "source_rows": 570,
+      "dev_rows": 114,
+      "validation_rows": 114,
+      "test_rows": 342
+    },
+    "task4_ability2": {
+      "source_rows": 1231,
+      "dev_rows": 246,
+      "validation_rows": 246,
+      "test_rows": 739
+    },
+    "task4_ability3": {
+      "source_rows": 500,
+      "dev_rows": 100,
+      "validation_rows": 100,
+      "test_rows": 300
+    },
+    "task4_ability4": {
+      "source_rows": 325,
+      "dev_rows": 65,
+      "validation_rows": 65,
+      "test_rows": 195
+    },
+    "task4_ability5": {
+      "source_rows": 260,
+      "dev_rows": 52,
+      "validation_rows": 52,
+      "test_rows": 156
+    }
+  }
+}

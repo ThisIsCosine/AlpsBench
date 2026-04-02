@@ -1,7 +1,6 @@
-openai>=1.14.0
-requests>=2.31.0
-
-python-dotenv>=1.0.0
-
-pandas>=2.0.0
-tqdm>=4.66.0
+# The current public benchmark surface under `scripts/` and `src/benchmark/`
+# uses only the Python standard library at runtime.
+#
+# Optional developer and baseline dependencies live in:
+# - requirements-dev.txt
+# - requirements-baselines.txt

@@ -1,0 +1,55 @@
+{
+  "status": "ok",
+  "dataset_version": "v1",
+  "source": "public_layout",
+  "examples": {
+    "task1": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task2": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task3_d100": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task3_d300": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task3_d500": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task3_d700": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task3_d1000": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task4_ability1": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task4_ability2": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task4_ability3": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task4_ability4": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    },
+    "task4_ability5": {
+      "model_input_rows": 2,
+      "reference_output_rows": 2
+    }
+  }
+}

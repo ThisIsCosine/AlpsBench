@@ -1,0 +1,5 @@
+{
+  "status": "public-layout",
+  "dataset_version": "v1",
+  "note": "The public repository no longer rebuilds from legacy intermediate directories. Canonical raw source remains under Alps_data_v1/."
+}

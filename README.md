@@ -1,50 +1,291 @@
-## This is the official repository of the paper[AlpsBench: An LLM Personalization Benchmark for Real-Dialogue Memorization and Preference Alignment](https://arxiv.org/abs/placeholder) and the [AlpsBench](https://huggingface.co/datasets/Cosineyx/Alpsbench) benchmark.
+# AlpsBench
 
-
-
-[![Paper](https://img.shields.io/badge/Paper-arXiv-B31B1B)](https://arxiv.org/pdf/2603.26680) [![Project](https://img.shields.io/badge/Project_Page-Link-blue)](https://misshsiaoo.github.io/Alps_Bench/) [![Data](https://img.shields.io/badge/🤗HuggingFace-Link-FFA500)](https://huggingface.co/datasets/Cosineyx/Alpsbench)
-
-We present <img src="figures/alps_new.png" alt="Logo" width="34"/> **AlpsBench**, an LLM PerSonalization benchmark derived from real-world human–LLM dialogues. While existing benchmarks rely heavily on synthetic dialogues that exhibit a distribution gap from real-world conversations, AlpsBench bridges this gap by comprising 2,500 long-term interaction sequences curated from WildChat. These are paired with human-verified structured memories that encapsulate both explicit and implicit personalization signals.
-
-**We systematically evaluate the entire lifecycle of memory management through four pivotal tasks:**
-- **Task 1: Personalized Information Extraction** - Can LLMs reliably extract latent user traits into structured memories?
-- **Task 2: Personalized Information Update** - Can LLMs track user preference dynamics and resolve conflicts?
-- **Task 3: Personalized Information Retrieval** - Are LLMs robust in retrieving relevant memories from large distractor pools?
-- **Task 4: Personalized Information Utilization** - Do explicit memory mechanisms inherently guarantee preference-aligned or emotionally resonant responses?
-
----
-
-## Part 1: 📊 Benchmark Data & Task Introduction
+> [Accepted by SIGIR 2026 Resource Track] [April 2026]
 
 <p align="center">
-<!-- [PLACEHOLDER] Insert your task design / evaluation framework figure here (Figure 3 in paper) -->
-<img src="figures/tasks_outline.jpg" alt="Evaluation Tasks Overview"/>
+  <img src="figures/github_img.png" alt="AlpsBench overview" width="960" />
 </p>
 
-We release the full benchmark data of **AlpsBench** on [🤗HuggingFace](https://huggingface.co/datasets/Cosineyx/Alpsbench). The benchmark evaluates AI assistants across four distinct tasks. Below are the task definitions and descriptions of the data files provided in the `examples/` directory.
+<p align="center">
+  <strong>AlpsBench</strong> is a benchmark for long-term personalization in LLM assistants on real dialogue data.
+</p>
 
-### Task 1: Implicit Memory Extraction
-- **Goal:** Evaluates the ability to extract personalized information from raw conversational data. The LLM must distill history into structured memory entries (Memory ID, Type, Label, Value, Confidence).
-- **Data Format:** `examples/task1/task1_dataset.json` contains examples of raw dialogue history paired with human-annotated ground-truth memory entries.
+<p align="center">
+  <a href="https://arxiv.org/abs/2603.26680"><img src="https://img.shields.io/badge/Paper-arXiv%3A2603.26680-B31B1B" alt="Paper" /></a>
+  <a href="https://huggingface.co/datasets/Cosineyx/Alpsbench"><img src="https://img.shields.io/badge/HuggingFace-Dataset-FFB000" alt="Hugging Face Dataset" /></a>
+  <a href="docs/leaderboard.md"><img src="https://img.shields.io/badge/Leaderboard-Policy-green" alt="Leaderboard" /></a>
+  <a href="docs/usage.md"><img src="https://img.shields.io/badge/Docs-Usage-black" alt="Docs" /></a>
+  <a href="adapter_example/"><img src="https://img.shields.io/badge/Adapter-Example-orange" alt="Adapter Example" /></a>
+</p>
 
-### Task 2: Memory Update & Conflict Resolution
-- **Goal:** Assesses the capacity to track dynamic user preferences. Given historical memories and a *new* dialogue, the LLM must determine the correct action: *Retention* (filtering noise), *Addition* (new preferences), or *Modification* (resolving conflicts).
-- **Data Format:** `examples/task2/task2_dataset.json` demonstrates inputs of existing memory + new dialogue, with the target output being the updated memory state and specific action labels.
+## ✨ Overview
 
-### Task 3: Evidence-based Memory Retrieval
-- **Goal:** Measures the ability to retrieve relevant personalized information. Given a user query and a candidate set of memories (1 positive + N distractors), the model must identify the correct memory.
-- **Data Format:** `examples/task3/task3_dataset_d100.json` demonstrates the setting with **100 distractors**. The full benchmark includes pools of 100, 300, 500, 700, and 1000 distractors.
+AlpsBench evaluates long-term personalization across four core tasks:
 
-### Task 4: End-to-End Personalized Generation (Utilization)
-- **Goal:** Examines how well the LLM utilizes user history to generate preference-aligned responses. We break this down into 5 sub-dimensions:
-  - `ability1.json` (**Persona Awareness**): Recalling explicit user attributes (e.g., occupation).
-  - `ability2.json` (**Preference Following**): Inferring latent, dynamic preferences.
-  - `ability3.json` (**Virtual-Reality Awareness**): Distinguishing real user info from role-play/fictional content.
-  - `ability4.json` (**Constraint Following**): Respecting previously stated negative constraints.
-  - `ability5.json` (**Emotional Intelligence**): Providing emotionally appropriate responses.
+- **Task 1: memory extraction**
+- **Task 2: memory update**
+- **Task 3: memory retrieval**
+- **Task 4: memory-grounded response generation**
 
-### 🐰 Citation
-If you find our work inspires you, please consider citing it:
+It is built on real-world human-LLM dialogues curated from WildChat and pairs those dialogues with human-verified structured memories. The public release is designed so users can either:
+
+- score their own `predictions.jsonl`, or
+- plug their own model into AlpsBench through `--predict-program` with a simple `stdin/stdout` JSON adapter
+
+If you are new to AlpsBench, the fastest reading order is:
+
+1. [docs/usage.md](docs/usage.md)
+2. [docs/prediction_contract.md](docs/prediction_contract.md)
+3. [docs/evaluation_matrix.md](docs/evaluation_matrix.md)
+
+## 🧭 Benchmark Design
+
+<p align="center">
+  <img src="figures/tasks_outline.jpg" alt="Evaluation Tasks Overview" />
+</p>
+
+At a high level, AlpsBench measures the full memory lifecycle:
+
+- **Extraction:** can the model turn dialogue into structured memories?
+- **Update:** can it revise memories when user preferences change?
+- **Retrieval:** can it pick the right memory from large distractor pools?
+- **Utilization:** can it generate responses that are actually grounded in remembered user information?
+
+## 📊 Benchmark Results
+
+The paper reports the following reference results for representative general-purpose models.
+
+These numbers are benchmark-side paper results, not the direct output of the public `scripts/evaluate.py` local scorer.
+
+
+| Model                 | Task 1<br>Extraction | Task 2<br>Update | Task 3 Retr.<br>100 | Task 3 Retr.<br>300 | Task 3 Retr.<br>500 | Task 3 Retr.<br>700 | Task 3 Retr.<br>1000 | Task 4<br>PA | Task 4 PF<br>Gen. | Task 4 PF<br>Int. | Task 4<br>VRA | Task 4<br>CF | Task 4 EI<br>EN | Task 4 EI<br>CN |
+| :-------------------- | :------------------: | :--------------: | :-----------------: | :-----------------: | :-----------------: | :-----------------: | :------------------: | :----------: | :---------------: | :---------------: | :-----------: | :----------: | :-------------: | :-------------: |
+| **GPT-5.2**           |        41.43        |    **81.49**    |       0.9254       |       0.9052       |       0.8884       |       0.8733       |        0.8572        |    0.5702    |      0.6983      |    **0.7680**    |    0.5702    |    0.5702    |      3.42      |      3.90      |
+| **GPT-4.1-mini**      |        33.69        |      54.66      |       0.8802       |       0.8156       |       0.7761       |       0.7482       |        0.7295        |    0.4018    |      0.4995      |      0.5240      |    0.4018    |    0.4018    |      2.79      |      2.92      |
+| **DeepSeek Reasoner** |        47.79        |      80.91      |     **0.9569**     |     **0.9484**     |     **0.9376**     |       0.9083       |      **0.9273**      |    0.5825    |      0.6483      |      0.6120      |    0.5825    |  **0.9602**  |      3.66      |    **4.00**    |
+| **Gemini-3 Flash**    |      **51.67**      |      68.85      |       0.9538       |       0.9419       |       0.9342       |     **0.9268**     |        0.9269        |  **0.6895**  |    **0.7655**    |      0.7052      |  **0.6895**  |    0.8328    |      3.49      |      3.58      |
+| **Llama-4 Maverick**  |        22.07        |      58.84      |       0.8729       |       0.6005       |       0.5616       |       0.5141       |        0.4811        |    0.2684    |      0.1152      |      0.3080      |    0.1552    |    0.8720    |      2.48      |      2.38      |
+| **Claude-Sonnet-4.5** |        41.64        |      51.25      |       0.9542       |       0.9030       |       0.9222       |       0.8999       |        0.8855        |    0.5614    |      0.6045      |      0.5498      |    0.5933    |    0.9514    |      3.10      |      3.05      |
+| **Qwen3-max**         |        39.01        |      76.28      |       0.9180       |       0.8669       |       0.8314       |       0.7871       |        0.7542        |    0.6228    |      0.6901      |      0.6574      |    0.6834    |    0.8267    |    **3.68**    |      3.84      |
+
+Notes:
+
+- **PA** = Persona Awareness
+- **PF** = Preference Following
+- **VRA** = Virtual-Reality Awareness
+- **CF** = Constraint Following
+- **EI** = Emotional Intelligence
+
+For reporting policy and submission details, see [docs/leaderboard.md](docs/leaderboard.md).
+
+## 🚀 Quickstart
+
+Create an environment and install dependencies:
+
+```bash
+conda create -n alpsbench python=3.10
+conda activate alpsbench
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+Validate the released data layout and smoke-check the example split:
+
+```bash
+python scripts/validate_data.py
+python scripts/smoke_examples.py
+python scripts/evaluate.py --task task1 --split examples --oracle
+```
+
+Run your own predictions on public local-scoring splits:
+
+```bash
+python scripts/evaluate.py --task task1 --split dev --predictions my_task1_predictions.jsonl
+python scripts/evaluate.py --task task1 --split validation --predictions my_task1_predictions.jsonl
+python scripts/evaluate.py --task task3 --distractors 500 --split dev --predictions my_task3_predictions.jsonl
+python scripts/evaluate.py --task task4 --ability ability3 --split dev --predictions my_task4_predictions.jsonl
+```
+
+Generate official `test` predictions for submission:
+
+```bash
+python scripts/evaluate.py --task task1 --split test --predictions my_task1_predictions.jsonl
+python scripts/evaluate.py --task task4 --ability ability2 --split test --predict-program python --predict-arg my_adapter.py
+```
+
+For `test`, the evaluator writes `predictions.jsonl` and `summary.json` but does not score locally because no public references are available.
+
+For `examples`, `dev`, and `validation`, `scripts/evaluate.py` returns public local proxy scores for self-checking and debugging. These local scores are useful for format validation and iteration, but they are not identical to the full benchmark-side reporting used in the paper and leaderboard. See [docs/metrics.md](docs/metrics.md) and [docs/evaluation_matrix.md](docs/evaluation_matrix.md) for the task-by-task scoring surface.
+
+**Evaluation note.** To preserve blind evaluation integrity, we do not fully release benchmark-side judge prompts or hidden scoring details. The public task logic, prediction contract, and local evaluation surface are documented in [docs/evaluation_matrix.md](docs/evaluation_matrix.md) and related docs.
+
+## 🔌 Adapter Workflow
+
+The public CLI is provider-agnostic. If you want AlpsBench to call your model directly, use `--predict-program` with repeated `--predict-arg`.
+
+Example:
+
+```bash
+python scripts/evaluate.py --task task4 --ability ability2 --split examples --predict-program python --predict-arg adapter_example/minimal_adapter.py
+```
+
+The evaluator sends one `model_input.jsonl` row as JSON on `stdin`, and your adapter must return exactly one prediction JSON object on `stdout`.
+
+The repository includes a minimal standalone skeleton in [adapter_example/](adapter_example/):
+
+- [adapter_example/README.md](adapter_example/README.md)
+- [adapter_example/minimal_adapter.py](adapter_example/minimal_adapter.py)
+
+On Windows, if your adapter emits non-ASCII JSON directly to `stdout`, prefer:
+
+```bash
+python scripts/evaluate.py --task task4 --ability ability2 --split examples --predict-program python --predict-arg -X --predict-arg utf8 --predict-arg adapter_example/minimal_adapter.py
+```
+
+Python's default `json.dump(...)` is already safe because it emits ASCII escapes unless you explicitly disable that behavior.
+
+## 📦 Public Release Layout
+
+The public repository surface is:
+
+- `benchmark_data/`
+- `adapter_example/`
+- `scripts/`
+- `src/benchmark/`
+- `docs/`
+
+Private maintainer assets such as hidden gold, local tools, and notebooks are not part of the benchmark interface.
+
+Public benchmark data is organized by split:
+
+- `benchmark_data/examples/`: tiny runnable examples with public references
+- `benchmark_data/dev/`: public development split with public references
+- `benchmark_data/validation/`: public holdout validation split with public references
+- `benchmark_data/test/`: official public test inputs only
+- `benchmark_data/artifacts/`: release manifests and split summaries
+
+Each public track uses:
+
+- `model_input.jsonl`: model-visible input rows
+- `reference_output.jsonl`: public gold rows for `examples`, `dev`, and `validation`
+
+`benchmark_data/test/` does not expose public `reference_output.jsonl`. Private hidden gold for `test` lives under `hidden/private_gold/`.
+
+The released split policy is deterministic and track-local:
+
+- `1/5` of each track is in `dev`
+- `1/5` of each track is in `validation`
+- `3/5` of each track is in `test`
+
+Current row counts are recorded in `benchmark_data/artifacts/build_summary.json`, and split metadata is recorded in `benchmark_data/artifacts/split_manifest.json`.
+
+## 🧾 Prediction And Submission Contract
+
+Users submit prediction rows, not `reference_output.jsonl`.
+
+- prediction files must contain exactly one JSON object per input row
+- every input `benchmark_id` must appear exactly once
+- `benchmark_data/examples/*/reference_output.jsonl` is public gold and sample data, not the required submission format
+- `runs/public/test/<track>/predictions.jsonl` is the run artifact to send for hidden evaluation
+
+The exact task-level prediction schema is documented in [docs/prediction_contract.md](docs/prediction_contract.md). That document also spells out the nested object structure for `memory_items` and the expected content shape for Task 3 and Task 4 outputs.
+
+## 🏆 Leaderboard And Submission
+
+The public reporting surface follows the paper-style task view:
+
+- `task1`: memory extraction
+- `task2`: memory update
+- `task3`: retrieval
+- `task4_ability1`
+- `task4_ability2`
+- `task4_ability3`
+- `task4_ability4`
+- `task4_ability5`
+
+Task 4 abilities are scored and ranked independently
+
+The paper reports reference Task 3 retrieval baselines including `nltk + bm25` and `all-MiniLM-L6-v2`. The current public repository release does not bundle official runnable baseline implementations; baseline details and reported results should be read from the paper.
+
+For external submission:
+
+1. run your system on `benchmark_data/test/`
+2. produce a contract-conforming `predictions.jsonl`
+3. submit the generated output by contacting the first author listed in the paper or by opening a GitHub issue
+
+After verification, accepted model results can be added to the benchmark reporting surface.
+
+## 🗂️ Public Commands
+
+User-facing commands:
+
+- `python scripts/validate_data.py`
+- `python scripts/smoke_examples.py`
+- `python scripts/evaluate.py --task ... --split ... --dry-run`
+- `python scripts/evaluate.py --task ... --split ... --oracle`
+- `python scripts/evaluate.py --task ... --split ... --predictions ...`
+- `python scripts/evaluate.py --task task3 --distractors 100|300|500|700|1000 --split ...`
+- `python scripts/evaluate.py --task ... --split ... --predict-program ... --predict-arg ...`
+- `python scripts/evaluate.py --task ... --split ... --predict-command "..."`
+
+Maintainer-oriented commands:
+
+- `python scripts/build_data.py --overwrite`
+- `python scripts/split_public_data.py --force`
+
+## 📚 Documentation Map
+
+- [docs/usage.md](docs/usage.md)
+- [docs/prediction_contract.md](docs/prediction_contract.md)
+- [docs/data.md](docs/data.md)
+- [docs/metrics.md](docs/metrics.md)
+- [docs/evaluation_matrix.md](docs/evaluation_matrix.md)
+- [docs/leaderboard.md](docs/leaderboard.md)
+- [docs/repository_structure.md](docs/repository_structure.md)
+- [docs/implementation_blueprint.md](docs/implementation_blueprint.md)
+- [REPOSITORY_REFACTOR_ROADMAP.md](REPOSITORY_REFACTOR_ROADMAP.md)
+
+## 🧪 Dataset Card And Provenance
+
+At a high level, the released benchmark data follows the paper's benchmark construction pipeline and should be read together with the paper for full details.
+
+- source provenance: the benchmark is derived from real-world human-LLM dialogues curated from WildChat
+- scale: the paper describes AlpsBench as comprising 2,500 long-term interaction sequences
+- memory quality: the benchmark pairs those interactions with human-verified structured memories
+- annotation process: the paper describes a four-step pipeline of data collection, structured memory extraction, human annotation or verification, and task construction
+- release form: this repository distributes the processed benchmark package used for public evaluation rather than raw dialogue dumps
+
+<p align="center">
+  <img src="figures/data_construction.png" alt="Data Construction Pipeline" />
+</p>
+
+`benchmark_data/` in this repository is the released public benchmark dataset for the current `v1` release. There is no separate public download for a larger benchmark package in the current repository release.
+
+This means:
+
+- `benchmark_data/` is the final public benchmark data layout
+- `benchmark_data/artifacts/` contains committed release metadata for that data
+- `runs/public/...` contains user-generated evaluation artifacts, not dataset files
+
+## 🔐 Data Usage And Privacy
+
+Please treat `benchmark_data/` as benchmark data for research and evaluation use, not as a source for deanonymization, identity linkage, or recovery of hidden evaluation targets.
+
+For licensing, attribution, provenance, and additional methodological details, follow the paper and the upstream WildChat source cited there.
+
+Repository-level files:
+
+- [LICENSE](LICENSE)
+- [DATA_USAGE.md](DATA_USAGE.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CHANGELOG.md](CHANGELOG.md)
+
+## ⚙️ Configuration
+
+API-backed evaluation should start from `configs/api.example.json`.
+
+## 📖 Citation
+
 ```bibtex
 @article{xiao2026alpsbench,
   title={AlpsBench: An LLM Personalization Benchmark for Real-Dialogue Memorization and Preference Alignment},
@@ -52,161 +293,4 @@ If you find our work inspires you, please consider citing it:
   journal={arXiv preprint},
   year={2026}
 }
-```
-
----
-
-## Part 2: 🚀 Running Inference on Benchmark Data
-
-🚀 Performance Leaderboard
-
-🚨 We evaluate 7 state-of-the-art general-purpose LLMs, including GPT-5.2, GPT-4.1-mini, DeepSeek Reasoner, Gemini-3 Flash, Llama-4 Maverick, Claude-Sonnet-4.5, and Qwen3-max across our four core tasks.
-
-*Table: Experimental evaluation result of general-purpose LLMs (Tasks 1–4).*
-
-| Model | Task 1<br>Extraction | Task 2<br>Update | Task 3 Retr.<br>100 | Task 3 Retr.<br>300 | Task 3 Retr.<br>500 | Task 3 Retr.<br>700 | Task 3 Retr.<br>1000 | Task 4<br>PA | Task 4 PF<br>Gen. | Task 4 PF<br>Int. | Task 4<br>VRA | Task 4<br>CF | Task 4 EI<br>EN | Task 4 EI<br>CN |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **GPT-5.2** | 41.43 | **81.49** | 0.9254 | 0.9052 | 0.8884 | 0.8733 | 0.8572 | 0.5702 | 0.6983 | **0.7680** | 0.5702 | 0.5702 | 3.42 | 3.90 |
-| **GPT-4.1-mini** | 33.69 | 54.66 | 0.8802 | 0.8156 | 0.7761 | 0.7482 | 0.7295 | 0.4018 | 0.4995 | 0.5240 | 0.4018 | 0.4018 | 2.79 | 2.92 |
-| **DeepSeek Reasoner** | 47.79 | 80.91 | **0.9569** | **0.9484** | **0.9376** | 0.9083 | **0.9273** | 0.5825 | 0.6483 | 0.6120 | 0.5825 | **0.9602** | 3.66 | **4.00** |
-| **Gemini-3 Flash** | **51.67** | 68.85 | 0.9538 | 0.9419 | 0.9342 | **0.9268** | 0.9269 | **0.6895** | **0.7655** | 0.7052 | **0.6895** | 0.8328 | 3.49 | 3.58 |
-| **Llama-4 Maverick** | 22.07 | 58.84 | 0.8729 | 0.6005 | 0.5616 | 0.5141 | 0.4811 | 0.2684 | 0.1152 | 0.3080 | 0.1552 | 0.8720 | 2.48 | 2.38 |
-| **Claude-Sonnet-4.5**| 41.64 | 51.25 | 0.9542 | 0.9030 | 0.9222 | 0.8999 | 0.8855 | 0.5614 | 0.6045 | 0.5498 | 0.5933 | 0.9514 | 3.10 | 3.05 |
-| **Qwen3-max** | 39.01 | 76.28 | 0.9180 | 0.8669 | 0.8314 | 0.7871 | 0.7542 | 0.6228 | 0.6901 | 0.6574 | 0.6834 | 0.8267 | **3.68** | 3.84 |
-
-> **Notes:** **PA** = Persona Awareness, **PF** = Preference Following, **VRA** = Virtual-Reality Awareness, **CF** = Constraint Following, **EI** = Emotional Intelligence. 
-
----
-
-### 🔗 Dependencies & Setup
-Please run the following commands to create a virtual environment and install all requirements:
-```bash
-conda create -n alpsbench python=3.10
-conda activate alpsbench
-pip install -r requirements.txt
-```
-
-API Keys Configuration:
-Before running the inference scripts, please configure your API settings in api.json. You need to set the global base_url (if applicable), along with the specific model_endpoints and model_keys for the models you intend to use:
-```json
-{
-  "base_url": "https://api.your-provider.com/v1",
-  "model_endpoints": {
-    "gpt-4o": "https://api.openai.com/v1/chat/completions",
-    "deepseek-reasoner": "https://api.deepseek.com/chat/completions"
-  },
-  "model_keys": {
-    "gpt-4o": "sk-...",
-    "deepseek-reasoner": "sk-..."
-  }
-}
-```
-
-
-### 💻 One-Click Evaluation Scripts for Each Task
-
-We provide ready-to-use inference scripts in the `scripts/` directory. You can specify the model (e.g., `gpt-4o`, `deepseek-reasoner`) via the `--model` argument.
-
-**1. Evaluate Task 1 (Extraction)**
-```bash
-# Tests the model's ability to extract structured memories and calculates F1 score against ground truth.
-python -m scripts.run_task1_inference --model gpt-4o --data_path data/task1/
-```
-💡 Note for Evaluating Custom Memory Systems:
-If you are directly testing the extraction performance of an existing memory system (e.g., LightMem, Mem0) rather than a base LLM, use the dedicated curator script:
-```bash
-python -m scripts.run_task1_curator_memorysystem
-```
-Input File Format: Ensure your input JSON/JSONL file follows this structure, where each record contains the ground truth and the system's extracted output:
-```json
-{
-  "ground_truth_memories": [ 
-      {"memory_id": "1", "label": "...", "value": "..."} 
-  ],
-  "memory_items": [ 
-      {"memory_id": "1", "label": "...", "value": "..."} 
-  ]
-}
-```
-**2. Evaluate Task 2 (Update)**
-```bash
-# Tests memory manipulation (Retention, Addition, Modification) accuracy.
-python -m scripts.run_task2_inference --model gpt-4o --data_path data/task2/
-```
-
-**3. Evaluate Task 3 (Retrieval)**
-```bash
-# Evaluates retrieval recall. You can specify the number of distractors (e.g., 100, 300, 1000).
-python -m scripts.run_task3_inference --model gpt-4o --distractors 100 --data_path data/task3/
-
-# Evaluate traditional BM25 retrieval baseline
-python -m scripts.run_task3_bm25 --distractors 100 --data_path data/task3/
-
-# Evaluate semantic similarity retrieval baseline (Embedding Model)
-python -m scripts.run_task3_embedding_model --distractors 100 --data_path data/task3/
-
-```
-
-**4. Evaluate Task 4 (Utilization)**
-```bash
-# Evaluates End-to-End generation. LLM-as-a-Judge (DeepSeek-v3.2) is used to score PA, PF, VRA, CF, and EI.
-python -m scripts.run_task4_inference --model gpt-4o --judge deepseek-reasoner --data_path data/task4/
-```
-*Evaluation results will be automatically saved to the `results/` directory.*
-
----
-
-## Part 3: 💬 Building the AlpsBench Dataset
-
-<p align="center">
-<!-- [PLACEHOLDER] Insert your 4-step curation pipeline figure here (Figure 4 in paper) -->
-<img src="figures/data_construction.png" alt="Data Curation Pipeline"/>
-</p>
-
-*Interested in how we built the real-world conversation data or want to build your own personalization benchmark? Follow our 4-step pipeline!*
-
-### The Construction Pipeline Overview
-1. **Data Collection:** Filtering long-term interaction sequences (6 to 249 turns) from the WildChat dataset.
-2. **Memory Extraction & Filtering:** Using DeepSeek-v3.2 to automatically extract structured info from raw dialogues.
-3. **Human Annotation:** Expert-level manual verification of extracted memories.
-4. **Task Construction:** Using GPT-5.2 to synthesize task-specific queries and ground-truth answers for Tasks 1-4.
-
-### 🛠️ One-Click Data Construction Scripts
-
-You can reproduce our dataset or generate new data using our construction scripts. Ensure you have the raw source data placed in `data/source/`.
-
-**Step 1 & 2: Dialogue Collection & Memory Extraction**
-```bash
-# Extracts memories from raw dialogues using the specified extraction model.
-python construct_pipeline.py --step extract --extractor deepseek-reasoner --input data/source/wildchat.jsonl --output data/processed/extracted_memories.json
-```
-*(Step 3: Human Annotation is done manually offline.)*
-
-**Step 4: Task-Specific Data Construction**
-After acquiring verified memories, use the following commands to construct the specific evaluation sets for each of the four tasks:
-
-**Construct Task 1 (Extraction Data)**
-
-The Task 1 dataset is directly derived from the human-annotated data. No additional generation script is required. The ground truth memory entries are provided directly in the dataset.
-
-**Construct Task 2 (Update Data)**
-```bash
-# Uses GPT to split dialogue into historical vs. new, and defines target update strategies (Retention, Addition, Modification).
-python -m scripts.run_task2_generate
-```
-
-**Construct Task 3 (Retrieval Data)**
-```bash
-# Step 1: Synthesize practical user inquiries (probes) related to a target memory.
-python -m scripts.run_task3_generate
-
-# Step 2: Inject negative distractor memories to build the final scaled test datasets.
-# Note: You can adjust the DISTRACTOR_COUNT within run_task3_distractor.py (e.g., 100, 300, 1000).
-python -m scripts.run_task3_distractor
-```
-
-**Construct Task 4 (Utilization Data)**
-```bash
-# Generates task queries across the 5 dimensions (PA, PF, VRA, CF, EI) along with ground-truth answers.
-python -m scripts.run_task3_generate
 ```

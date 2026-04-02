@@ -1,0 +1,42 @@
+{
+  "base_url": "",
+  "timeout": 60,
+  "model_endpoints": {
+    "deepseek-reasoner": "",
+    "o3-mini": "",
+    "gpt-4o-mini": "",
+    "gpt-4.1-mini": "",
+    "gpt-5.2": "",
+    "judge": "",
+    "deepseek-chat": "",
+    "gemini-3-pro": "",
+    "qwen3-max": "",
+    "meta-llama/llama-4-maverick": "",
+    "llama-4-scout-17b-16e-instruct": "",
+    "claude-sonnet-4-5-20250929": "",
+    "gemini-3-pro-preview": "",
+    "gemini-3-flash-preview": ""
+  },
+  "model_keys": {
+    "deepseek-reasoner": "",
+    "o3-mini": "",
+    "gpt-4o-mini": "",
+    "gpt-4.1-mini": "",
+    "gpt-5.2": "",
+    "judge": "",
+    "deepseek-chat": "",
+    "gemini-3-pro": "",
+    "qwen3-max": "",
+    "meta-llama/llama-4-maverick": "",
+    "llama-4-scout-17b-16e-instruct": "",
+    "claude-sonnet-4-5-20250929": "",
+    "gemini-3-pro-preview": "",
+    "gemini-3-flash-preview": ""
+  },
+  "judge_model_id": "deepseek-chat",
+  "memory_gate_model_id": "deepseek-reasoner",
+  "dialogue_max_turns": 8,
+  "dialogue_max_chars": 4000,
+  "curator_dialogue_max_turns": 6,
+  "curator_dialogue_max_chars": 2000
+}

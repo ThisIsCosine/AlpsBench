@@ -1,0 +1,145 @@
+{
+  "status": "ok",
+  "dataset_version": "v1",
+  "created_dirs": [
+    "benchmark_data/artifacts",
+    "benchmark_data/dev/task1",
+    "benchmark_data/dev/task2",
+    "benchmark_data/dev/task3/d100",
+    "benchmark_data/dev/task3/d1000",
+    "benchmark_data/dev/task3/d300",
+    "benchmark_data/dev/task3/d500",
+    "benchmark_data/dev/task3/d700",
+    "benchmark_data/dev/task4_ability1",
+    "benchmark_data/dev/task4_ability2",
+    "benchmark_data/dev/task4_ability3",
+    "benchmark_data/dev/task4_ability4",
+    "benchmark_data/dev/task4_ability5",
+    "benchmark_data/examples/task1",
+    "benchmark_data/examples/task2",
+    "benchmark_data/examples/task3/d100",
+    "benchmark_data/examples/task3/d1000",
+    "benchmark_data/examples/task3/d300",
+    "benchmark_data/examples/task3/d500",
+    "benchmark_data/examples/task3/d700",
+    "benchmark_data/examples/task4_ability1",
+    "benchmark_data/examples/task4_ability2",
+    "benchmark_data/examples/task4_ability3",
+    "benchmark_data/examples/task4_ability4",
+    "benchmark_data/examples/task4_ability5",
+    "benchmark_data/test/task1",
+    "benchmark_data/test/task2",
+    "benchmark_data/test/task3/d100",
+    "benchmark_data/test/task3/d1000",
+    "benchmark_data/test/task3/d300",
+    "benchmark_data/test/task3/d500",
+    "benchmark_data/test/task3/d700",
+    "benchmark_data/test/task4_ability1",
+    "benchmark_data/test/task4_ability2",
+    "benchmark_data/test/task4_ability3",
+    "benchmark_data/test/task4_ability4",
+    "benchmark_data/test/task4_ability5",
+    "benchmark_data/validation/task1",
+    "benchmark_data/validation/task2",
+    "benchmark_data/validation/task3/d100",
+    "benchmark_data/validation/task3/d1000",
+    "benchmark_data/validation/task3/d300",
+    "benchmark_data/validation/task3/d500",
+    "benchmark_data/validation/task3/d700",
+    "benchmark_data/validation/task4_ability1",
+    "benchmark_data/validation/task4_ability2",
+    "benchmark_data/validation/task4_ability3",
+    "benchmark_data/validation/task4_ability4",
+    "benchmark_data/validation/task4_ability5"
+  ],
+  "public_data_is_canonical": true,
+  "overwrite_requested": true,
+  "task1_authoritative_sync": {
+    "status": "synced",
+    "source": "authoritative_task1_pool",
+    "examples_rows": 2,
+    "dev_rows": 466,
+    "validation_rows": 466,
+    "test_rows": 1398
+  },
+  "task2_authoritative_sync": {
+    "status": "synced",
+    "source": "authoritative_task2_scored_entries",
+    "examples_rows": 2,
+    "dev_rows": 469,
+    "validation_rows": 469,
+    "test_rows": 1407
+  },
+  "task3_authoritative_sync": {
+    "status": "synced",
+    "source": "authoritative_task3_datasets",
+    "tracks": {
+      "task3_d100": {
+        "examples_rows": 2,
+        "dev_rows": 476,
+        "validation_rows": 476,
+        "test_rows": 1429
+      },
+      "task3_d300": {
+        "examples_rows": 2,
+        "dev_rows": 476,
+        "validation_rows": 476,
+        "test_rows": 1429
+      },
+      "task3_d500": {
+        "examples_rows": 2,
+        "dev_rows": 476,
+        "validation_rows": 476,
+        "test_rows": 1429
+      },
+      "task3_d700": {
+        "examples_rows": 2,
+        "dev_rows": 476,
+        "validation_rows": 476,
+        "test_rows": 1429
+      },
+      "task3_d1000": {
+        "examples_rows": 2,
+        "dev_rows": 476,
+        "validation_rows": 476,
+        "test_rows": 1429
+      }
+    }
+  },
+  "task4_authoritative_sync": {
+    "status": "synced",
+    "source": "authoritative_task4_datasets",
+    "tracks": {
+      "task4_ability1": {
+        "examples_rows": 2,
+        "dev_rows": 114,
+        "validation_rows": 114,
+        "test_rows": 342
+      },
+      "task4_ability2": {
+        "examples_rows": 2,
+        "dev_rows": 246,
+        "validation_rows": 246,
+        "test_rows": 739
+      },
+      "task4_ability3": {
+        "examples_rows": 2,
+        "dev_rows": 100,
+        "validation_rows": 100,
+        "test_rows": 300
+      },
+      "task4_ability4": {
+        "examples_rows": 2,
+        "dev_rows": 65,
+        "validation_rows": 65,
+        "test_rows": 195
+      },
+      "task4_ability5": {
+        "examples_rows": 2,
+        "dev_rows": 52,
+        "validation_rows": 52,
+        "test_rows": 156
+      }
+    }
+  }
+}
