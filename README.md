@@ -13,7 +13,7 @@
 <p align="center">
   <a href="https://arxiv.org/abs/2603.26680"><img src="https://img.shields.io/badge/Paper-arXiv%3A2603.26680-B31B1B" alt="Paper" /></a>
   <a href="https://huggingface.co/datasets/Cosineyx/Alpsbench"><img src="https://img.shields.io/badge/HuggingFace-Dataset-FFB000" alt="Hugging Face Dataset" /></a>
-  <a href="docs/leaderboard.md"><img src="https://img.shields.io/badge/Leaderboard-Policy-green" alt="Leaderboard" /></a>
+  <a href="https://misshsiaoo.github.io/Alps_Bench/"><img src="https://img.shields.io/badge/Leaderboard-Live-green" alt="Leaderboard" /></a>
   <a href="docs/usage.md"><img src="https://img.shields.io/badge/Docs-Usage-black" alt="Docs" /></a>
   <a href="adapter_example/"><img src="https://img.shields.io/badge/Adapter-Example-orange" alt="Adapter Example" /></a>
 </p>
