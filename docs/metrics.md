@@ -17,11 +17,12 @@ publicly because no public references are released.
 
 - `task1`: set-based memory-item precision, recall, F1, and exact-match rate
 - `task2`: set-based updated-memory precision, recall, F1, and exact-match rate
-- `task3_d100`, `task3_d300`, `task3_d500`, `task3_d700`, `task3_d1000`:
+- `task3_d100`:
   public local proxy is selected-memory accuracy using `selected_memory_id`
   match; benchmark-side paper reporting treats Task 3 as a retrieval task and
   reports `precision` and `recall`
-- `task4_ability1..5`: grounding proxy based on `used_memory_fact` match against the gold selected memory
+- `task4_ability1..4`: grounding proxy based on `used_memory_fact` match against the gold selected memory
+- `task4_ability5`: reserved and empty in v4; no score is reported
 
 ## Metric Types
 
@@ -82,7 +83,7 @@ The released public scorer expects task-specific prediction rows, not full
 
 - `task1`: `benchmark_id`, `memory_items`
 - `task2`: `benchmark_id`, `memory_items`
-- `task3_d100`, `task3_d300`, `task3_d500`, `task3_d700`, `task3_d1000`:
+- `task3_d100`:
   `benchmark_id`, `answer`, `reason`, `selected_memory_id`
 - `task4`: `benchmark_id`, `answer`, `used_memory_fact`
 

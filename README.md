@@ -102,7 +102,7 @@ Run your own predictions on public local-scoring splits:
 ```bash
 python scripts/evaluate.py --task task1 --split dev --predictions my_task1_predictions.jsonl
 python scripts/evaluate.py --task task1 --split validation --predictions my_task1_predictions.jsonl
-python scripts/evaluate.py --task task3 --distractors 500 --split dev --predictions my_task3_predictions.jsonl
+python scripts/evaluate.py --task task3 --distractors 100 --split dev --predictions my_task3_predictions.jsonl
 python scripts/evaluate.py --task task4 --ability ability3 --split dev --predictions my_task4_predictions.jsonl
 ```
 
@@ -201,9 +201,9 @@ The public reporting surface follows the paper-style task view:
 - `task4_ability2`
 - `task4_ability3`
 - `task4_ability4`
-- `task4_ability5`
+- `task4_ability5` (reserved; the v4 source file is empty)
 
-Task 4 abilities are scored and ranked independently
+Populated Task 4 abilities are scored and ranked independently.
 
 The paper reports reference Task 3 retrieval baselines including `nltk + bm25` and `all-MiniLM-L6-v2`. The current public repository release does not bundle official runnable baseline implementations; baseline details and reported results should be read from the paper.
 
@@ -224,13 +224,13 @@ User-facing commands:
 - `python scripts/evaluate.py --task ... --split ... --dry-run`
 - `python scripts/evaluate.py --task ... --split ... --oracle`
 - `python scripts/evaluate.py --task ... --split ... --predictions ...`
-- `python scripts/evaluate.py --task task3 --distractors 100|300|500|700|1000 --split ...`
+- `python scripts/evaluate.py --task task3 --distractors 100 --split ...`
 - `python scripts/evaluate.py --task ... --split ... --predict-program ... --predict-arg ...`
 - `python scripts/evaluate.py --task ... --split ... --predict-command "..."`
 
 Maintainer-oriented commands:
 
-- `python scripts/build_data.py --overwrite`
+- `python scripts/build_data.py --source /path/to/Alps_data_final_v4.zip --overwrite`
 - `python scripts/split_public_data.py --force`
 
 ## 📚 Documentation Map
@@ -259,13 +259,15 @@ At a high level, the released benchmark data follows the paper's benchmark const
   <img src="figures/data_construction.png" alt="Data Construction Pipeline" />
 </p>
 
-`benchmark_data/` in this repository is the released public benchmark dataset for the current `v1` release. There is no separate public download for a larger benchmark package in the current repository release.
+`benchmark_data/` in this repository is the released public benchmark dataset for the current `v4` release. It was deterministically generated from `Alps_data_final_v4`; checksums and source row counts are recorded in `benchmark_data/artifacts/source_bundle_manifest.json`.
 
 This means:
 
 - `benchmark_data/` is the final public benchmark data layout
 - `benchmark_data/artifacts/` contains committed release metadata for that data
 - `runs/public/...` contains user-generated evaluation artifacts, not dataset files
+
+The v4 archive contains only Task 3 d100. The older d300, d500, d700, and d1000 files are therefore not mixed into this release. Its `ability5.json` is an empty array, so Ability 5 remains a reserved, unscored track until a populated version is released. The raw annotation audit file is not committed because it contains information used to construct hidden test references.
 
 ## 🔐 Data Usage And Privacy
 

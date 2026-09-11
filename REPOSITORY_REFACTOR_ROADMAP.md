@@ -1,5 +1,12 @@
 # AlpsBench Benchmark Release Roadmap
 
+> **v4 update:** The active canonical source is now the flat
+> `Alps_data_final_v4` bundle. References below to `Alps_data_v1`, legacy
+> normalized folders, and the earlier multi-size Task 3 surface describe the
+> historical refactor and are not the current release contract. See
+> `docs/data.md` and `benchmark_data/artifacts/source_bundle_manifest.json` for
+> the authoritative v4 layout.
+
 ## Purpose
 
 This document is the single source of truth for turning the current research-style codebase into a reusable, benchmark-grade, easy-to-understand GitHub repository.
@@ -39,30 +46,12 @@ These are useful foundations, but they are not yet enough for a clean public ben
 
 ## Canonical Data Source
 
-Until we normalize and repackage the benchmark, treat `Alps_data_v1/` as the current source of truth for public-data reconstruction.
-
-Observed structure:
-
-- `Alps_data_v1/benchmark_construction_check_data/`
-  - Per-task session exports with `manifest.json` and `sessions/<id>/item.json`
-  - Contains benchmark-side records, original task payloads, and gold data
-- `Alps_data_v1/LLM_as_judge_Human_Alignment_data/`
-  - Per-task session exports with model outputs, judge outputs, judge scores, and final scores
-  - Best suited for baseline/reference analysis, not the primary public benchmark input format
-- `Alps_data_v1/task1_evaluation_data/`
-  - Task-1-specific flattened evaluation bundle with dialogue, extraction query, gold answer, model outputs, and judge results
-  - Useful as analysis material and metric examples
-- `Alps_data_v1/task1/`, `task2/`, `task3/`
-  - Currently appear to be log or pool-summary style exports rather than the main benchmark release format
-- `Alps_data_v1/task4/`
-  - Organized as `ability1` through `ability5`
-
-Concrete implications:
-
-- The future public repository should be built around `Alps_data_v1`, not around the older internal `data/...` and `benchmark/...` assumptions in the current code.
-- Task 4 public docs should align to `ability1` through `ability5` as exported in `Alps_data_v1`.
-- The `LLM_as_judge_Human_Alignment_data` branch should become an `analysis` or `reference_results` asset, not the main user-facing benchmark input path.
-- We should create a normalized public dataset layer from `Alps_data_v1`, rather than asking users to read raw export internals directly.
+The current source of truth is `Alps_data_final_v4.zip` (or its extracted
+`Alps_data_final_v4/` directory). `scripts/build_data.py --source ...
+--overwrite` validates the bundle inventory, converts the flat source schemas
+to the public task contracts, repartitions rows deterministically, and refreshes
+release manifests. Raw annotations remain outside the public Git tree to protect
+hidden test references.
 
 ---
 

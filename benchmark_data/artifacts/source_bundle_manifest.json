@@ -1,0 +1,73 @@
+{
+  "status": "ok",
+  "dataset_version": "v4",
+  "source_bundle": "Alps_data_final_v4",
+  "files": {
+    "task1_dataset.jsonl": {
+      "bytes": 57102890,
+      "rows": 2271,
+      "sha256": "650e8b851913d7b85f20953a3b76f5e936b2ded4522623b32598ae7d41db9cd0"
+    },
+    "task2_dataset.jsonl": {
+      "bytes": 73409333,
+      "rows": 2271,
+      "sha256": "1ee991c29670e4b9ee19bf9ec3008dbea559fba204dfc5170c944ea2c3afc490"
+    },
+    "task3_dataset_d100.jsonl": {
+      "bytes": 85192898,
+      "rows": 2271,
+      "sha256": "1d0b840fa2c1e907a7cd3f70cf0ccda542e62fbdfdb2c205f47bc8c77a462fcb"
+    },
+    "ability1.json": {
+      "bytes": 19803977,
+      "rows": 549,
+      "sha256": "4177909b450641b6a13c84c0215c34b098e4895910cd785b8f52431a83974dcd"
+    },
+    "ability2.json": {
+      "bytes": 27033999,
+      "rows": 1181,
+      "sha256": "fe0605710e6c733342e5c7e94cf773ad252e5ffb862a1d88cc6b5a971bb2514b"
+    },
+    "ability3.json": {
+      "bytes": 6683276,
+      "rows": 473,
+      "sha256": "59cdf84f95c077e11ed76a49f3999d9c8342844870bf11e7c99c8ef35b33beb8"
+    },
+    "ability4.json": {
+      "bytes": 14609444,
+      "rows": 299,
+      "sha256": "71c8e1f7e57d93aad11df5b740de5d85fd6be40b1b69b3c853f8c5e65133c363"
+    },
+    "ability5.json": {
+      "bytes": 2,
+      "rows": 0,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    "annotations_selected_clean_final_v4.json": {
+      "bytes": 38385258,
+      "rows": 9084,
+      "sha256": "35d7194be6009cef6e15e1bc1ed39d287583bb83a9ccd9c7817ba9994869ab25"
+    }
+  },
+  "annotations": {
+    "description": "Final selected annotations v4 — memory IDs converted to mN format, internal fields removed, turnId stripped from editableNewDialogue",
+    "total_sessions": 2271,
+    "annotation_rows": 9084,
+    "task_counts": {
+      "task1": 2271,
+      "task2": 2271,
+      "task3": 2271,
+      "task4": 2271
+    },
+    "privacy_boundary": "Raw annotations are source-only because they include information used to construct hidden test references."
+  },
+  "task3_normalization": {
+    "source_rows_with_duplicate_memory_ids": 2271,
+    "source_rows_with_duplicate_memory_semantics": 2271,
+    "source_semantic_duplicate_count": 22795,
+    "source_rows_with_ambiguous_selected_memory_id": 151,
+    "published_candidate_count_per_row": 101,
+    "published_candidate_id_policy": "row_local_unique_v4",
+    "repair": "Deduplicate by label/value, preserve source_memory_id, and deterministically fill from the v4 Task 1 memory pool."
+  }
+}

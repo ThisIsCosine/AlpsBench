@@ -525,6 +525,10 @@ benchmark-side implementation references may still show finer-grained internal
 judge modules, but those are background sources rather than separate public
 tracks.
 
+In dataset v4, `task4_ability5` is a reserved track with zero rows because the
+authoritative `ability5.json` is empty. The following Ability 5 dimensions
+describe the intended metric surface; no Ability 5 score is reported for v4.
+
 Across abilities, the benchmark-side judge is intended to answer two broad
 questions:
 
@@ -561,7 +565,7 @@ across all personalized response settings.
 Task 4 is officially treated as a family of independent benchmark tracks rather
 than one aggregated leaderboard task.
 
-The released policy is:
+For populated abilities, the released policy is:
 
 - each ability is scored independently
 - each ability is ranked independently

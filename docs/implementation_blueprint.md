@@ -1,5 +1,9 @@
 # Implementation Blueprint
 
+> Historical design document. The implemented v4 release surface is documented
+> in `docs/data.md`; in particular, v4 ships Task 3 d100 only and keeps Ability 5
+> as an empty reserved track.
+
 ## Purpose
 
 This file is the working spec for the repository refactor.

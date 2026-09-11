@@ -2,6 +2,16 @@
 
 All notable public benchmark-surface changes should be recorded here.
 
+## v4
+
+- rebuilt all public splits from `Alps_data_final_v4`
+- limited Task 3 to the d100 source track actually present in the v4 bundle
+- normalized Task 3 candidate IDs to stable row-local IDs and deterministically
+  filled duplicate source candidates from the v4 Task 1 memory pool
+- retained Ability 5 as an explicit empty reserved track
+- added safe zip import, source checksums, stronger validation, and provenance
+  documentation
+
 ## Unreleased
 
 - clarified that `benchmark_data/` is the full public `v1` benchmark release

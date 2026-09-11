@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "dataset_version": "v1",
+  "dataset_version": "v4",
   "source": "public_layout",
   "splits": {
     "examples": {
@@ -16,22 +16,6 @@
         "model_input_rows": 2,
         "reference_output_rows": 2
       },
-      "task3_d300": {
-        "model_input_rows": 2,
-        "reference_output_rows": 2
-      },
-      "task3_d500": {
-        "model_input_rows": 2,
-        "reference_output_rows": 2
-      },
-      "task3_d700": {
-        "model_input_rows": 2,
-        "reference_output_rows": 2
-      },
-      "task3_d1000": {
-        "model_input_rows": 2,
-        "reference_output_rows": 2
-      },
       "task4_ability1": {
         "model_input_rows": 2,
         "reference_output_rows": 2
@@ -49,146 +33,102 @@
         "reference_output_rows": 2
       },
       "task4_ability5": {
-        "model_input_rows": 2,
-        "reference_output_rows": 2
+        "model_input_rows": 0,
+        "reference_output_rows": 0
       }
     },
     "dev": {
       "task1": {
-        "model_input_rows": 466,
-        "reference_output_rows": 466
+        "model_input_rows": 454,
+        "reference_output_rows": 454
       },
       "task2": {
-        "model_input_rows": 469,
-        "reference_output_rows": 469
+        "model_input_rows": 454,
+        "reference_output_rows": 454
       },
       "task3_d100": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d300": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d500": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d700": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d1000": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
+        "model_input_rows": 454,
+        "reference_output_rows": 454
       },
       "task4_ability1": {
-        "model_input_rows": 114,
-        "reference_output_rows": 114
+        "model_input_rows": 109,
+        "reference_output_rows": 109
       },
       "task4_ability2": {
-        "model_input_rows": 246,
-        "reference_output_rows": 246
+        "model_input_rows": 236,
+        "reference_output_rows": 236
       },
       "task4_ability3": {
-        "model_input_rows": 100,
-        "reference_output_rows": 100
+        "model_input_rows": 94,
+        "reference_output_rows": 94
       },
       "task4_ability4": {
-        "model_input_rows": 65,
-        "reference_output_rows": 65
+        "model_input_rows": 59,
+        "reference_output_rows": 59
       },
       "task4_ability5": {
-        "model_input_rows": 52,
-        "reference_output_rows": 52
+        "model_input_rows": 0,
+        "reference_output_rows": 0
       }
     },
     "validation": {
       "task1": {
-        "model_input_rows": 466,
-        "reference_output_rows": 466
+        "model_input_rows": 454,
+        "reference_output_rows": 454
       },
       "task2": {
-        "model_input_rows": 469,
-        "reference_output_rows": 469
+        "model_input_rows": 454,
+        "reference_output_rows": 454
       },
       "task3_d100": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d300": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d500": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d700": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
-      },
-      "task3_d1000": {
-        "model_input_rows": 476,
-        "reference_output_rows": 476
+        "model_input_rows": 454,
+        "reference_output_rows": 454
       },
       "task4_ability1": {
-        "model_input_rows": 114,
-        "reference_output_rows": 114
+        "model_input_rows": 109,
+        "reference_output_rows": 109
       },
       "task4_ability2": {
-        "model_input_rows": 246,
-        "reference_output_rows": 246
+        "model_input_rows": 236,
+        "reference_output_rows": 236
       },
       "task4_ability3": {
-        "model_input_rows": 100,
-        "reference_output_rows": 100
+        "model_input_rows": 94,
+        "reference_output_rows": 94
       },
       "task4_ability4": {
-        "model_input_rows": 65,
-        "reference_output_rows": 65
+        "model_input_rows": 59,
+        "reference_output_rows": 59
       },
       "task4_ability5": {
-        "model_input_rows": 52,
-        "reference_output_rows": 52
+        "model_input_rows": 0,
+        "reference_output_rows": 0
       }
     },
     "test": {
       "task1": {
-        "model_input_rows": 1398
+        "model_input_rows": 1363
       },
       "task2": {
-        "model_input_rows": 1407
+        "model_input_rows": 1363
       },
       "task3_d100": {
-        "model_input_rows": 1429
-      },
-      "task3_d300": {
-        "model_input_rows": 1429
-      },
-      "task3_d500": {
-        "model_input_rows": 1429
-      },
-      "task3_d700": {
-        "model_input_rows": 1429
-      },
-      "task3_d1000": {
-        "model_input_rows": 1429
+        "model_input_rows": 1363
       },
       "task4_ability1": {
-        "model_input_rows": 342
+        "model_input_rows": 331
       },
       "task4_ability2": {
-        "model_input_rows": 739
+        "model_input_rows": 709
       },
       "task4_ability3": {
-        "model_input_rows": 300
+        "model_input_rows": 285
       },
       "task4_ability4": {
-        "model_input_rows": 195
+        "model_input_rows": 181
       },
       "task4_ability5": {
-        "model_input_rows": 156
+        "model_input_rows": 0
       }
     }
   }

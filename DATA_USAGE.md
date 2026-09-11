@@ -17,6 +17,10 @@ dialogues curated from WildChat and paired with human-verified structured
 memories. The paper describes a four-step pipeline of data collection, memory
 extraction, human verification, and task construction.
 
+The current public layout is dataset version `v4`, generated from the cleaned
+`Alps_data_final_v4` bundle. File-level checksums and row counts are recorded in
+`benchmark_data/artifacts/source_bundle_manifest.json`.
+
 ## Data License
 
 The paper states that WildChat is licensed under `ODC-BY` and that the released
@@ -32,6 +36,8 @@ public benchmark package.
 - the public benchmark package may be hosted in this GitHub repository
 - hidden evaluation references under `hidden/private_gold/` are not part of the
   public redistribution surface
+- `annotations_selected_clean_final_v4.json` remains a source-only audit file
+  because it contains information used to construct hidden test references
 - benchmark users should not attempt to reconstruct hidden gold from public
   files or run artifacts
 

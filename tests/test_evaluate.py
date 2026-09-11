@@ -107,9 +107,10 @@ def test_predict_program_evaluation_runs_on_task1_examples(tmp_path: Path) -> No
     summary = run_public_evaluation(
         task="task1",
         split="examples",
-        predict_argv=[sys.executable, "meta_script/mock_empty_memory_adapter.py"],
+        predict_argv=[sys.executable, "adapter_example/minimal_adapter.py"],
         output_dir=str(tmp_path / "task1_command_eval"),
     )
     assert summary["status"] == "ok"
     assert summary["main_metric"] == "mean_f1"
-    assert summary["main_score"] == 1.0
+    assert summary["main_score"] == 0.0
+    assert summary["prediction_source"] == "predict_program"

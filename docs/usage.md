@@ -121,15 +121,17 @@ Supported tasks:
 Public track mapping:
 
 - `task3` defaults to `task3_d100`
-- use `--distractors 100|300|500|700|1000` to select a different released Task
-  3 distractor pool
+- v4 supports `--distractors 100`; no larger Task 3 pools are present in the
+  v4 source bundle
 - `task4` requires `--ability ability1..ability5`
+
+Ability 5 is reserved but empty in v4, so it has no runnable evaluation rows.
 
 Example:
 
 ```bash
 python scripts/evaluate.py --task task4 --ability ability4 --split validation --predictions my_task4_predictions.jsonl
-python scripts/evaluate.py --task task3 --distractors 700 --split validation --predictions my_task3_predictions.jsonl
+python scripts/evaluate.py --task task3 --distractors 100 --split validation --predictions my_task3_predictions.jsonl
 ```
 
 ## Output Files

@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import os
 import shutil
+from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, Iterator, Mapping, Sequence
 
@@ -11,11 +12,13 @@ from .reports import read_json, read_jsonl, write_json, write_jsonl
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BENCHMARK_DATA_ROOT = REPO_ROOT / "benchmark_data"
-DATASET_VERSION = "v1"
+DATASET_VERSION = "v4"
 PUBLIC_SPLITS = ("examples", "dev", "validation", "test")
 REFERENCE_SPLITS = ("examples", "dev", "validation")
 LEAKAGE_CHECK_SPLITS = ("dev", "validation", "test")
-TASK3_DISTRACTOR_LEVELS = (100, 300, 500, 700, 1000)
+# The v4 release bundle contains only the 100-distractor Task 3 track.
+TASK3_DISTRACTOR_LEVELS = (100,)
+UNRELEASED_V4_TASK3_DISTRACTOR_LEVELS = (300, 500, 700, 1000)
 TASK3_PUBLIC_TRACK_NAMES = tuple(f"task3_d{level}" for level in TASK3_DISTRACTOR_LEVELS)
 TASK4_ABILITIES = ("ability1", "ability2", "ability3", "ability4", "ability5")
 TASK4_PUBLIC_TRACK_NAMES = tuple(f"task4_{ability}" for ability in TASK4_ABILITIES)
@@ -27,7 +30,7 @@ PUBLIC_TRACK_NAMES = (
 )
 PUBLIC_SPLIT_ORDER = ("dev", "validation", "test")
 PUBLIC_SPLIT_WEIGHTS = {"dev": 1, "validation": 1, "test": 3}
-PUBLIC_HASH_SALT = "alpsbench-public-split-v1"
+PUBLIC_HASH_SALT = "alpsbench-public-split-v4"
 TASK1_EXAMPLE_COUNT = 2
 SOURCE_DATASET_ROOT = Path("huggingface") / "Alpsbench" / "dataset"
 TASK2_TRACK_NAME = "task2"
@@ -39,6 +42,19 @@ TASK4_TRACK_SOURCE_PATHS = {
     "task4_ability4": ("task4", "ability4.json"),
 }
 TASK4_ABILITY5_SOURCE_FILES = ("final_data_English.json", "final_data_Chinese.json")
+V4_ANNOTATIONS_FILENAME = "annotations_selected_clean_final_v4.json"
+V4_EMPTY_TRACK_NAMES = ("task4_ability5",)
+V4_SOURCE_FILENAMES = (
+    "task1_dataset.jsonl",
+    "task2_dataset.jsonl",
+    "task3_dataset_d100.jsonl",
+    "ability1.json",
+    "ability2.json",
+    "ability3.json",
+    "ability4.json",
+    "ability5.json",
+    V4_ANNOTATIONS_FILENAME,
+)
 
 
 def _candidate_alps_data_roots() -> list[Path]:
@@ -57,6 +73,100 @@ def resolve_alps_data_root() -> Path | None:
     return None
 
 
+def _is_v4_source(alps_data_root: Path) -> bool:
+    return (alps_data_root / V4_ANNOTATIONS_FILENAME).is_file()
+
+
+def _source_file(alps_data_root: Path, filename: str, *legacy_parts: str) -> Path:
+    """Resolve a v4 flat-bundle file, with a legacy-layout fallback."""
+    flat_path = alps_data_root / filename
+    if flat_path.is_file():
+        return flat_path
+    return alps_data_root.joinpath(*legacy_parts)
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as source:
+        for chunk in iter(lambda: source.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _build_v4_source_manifest(alps_data_root: Path) -> dict[str, Any] | None:
+    if not _is_v4_source(alps_data_root):
+        return None
+
+    files: dict[str, dict[str, Any]] = {}
+    for filename in V4_SOURCE_FILENAMES:
+        path = alps_data_root / filename
+        if not path.is_file():
+            raise ValueError(f"Incomplete v4 source bundle; missing {filename}")
+        if path.suffix == ".jsonl":
+            rows = len(read_jsonl(path))
+        else:
+            payload = read_json(path)
+            rows = (
+                len(payload.get("annotations", []))
+                if filename == V4_ANNOTATIONS_FILENAME
+                else len(payload)
+            )
+        files[filename] = {
+            "bytes": path.stat().st_size,
+            "rows": rows,
+            "sha256": _sha256(path),
+        }
+
+    annotations = read_json(alps_data_root / V4_ANNOTATIONS_FILENAME)
+    annotation_rows = annotations.get("annotations", [])
+    task3_rows = read_jsonl(alps_data_root / "task3_dataset_d100.jsonl")
+    rows_with_duplicate_source_ids = 0
+    rows_with_duplicate_semantics = 0
+    semantic_duplicate_count = 0
+    ambiguous_selected_source_ids = 0
+    for row in task3_rows:
+        record = row.get("record") or {}
+        candidates = record.get("candidate_memories") or []
+        source_ids = [memory.get("memory_id") for memory in candidates]
+        semantic_keys = [_task3_semantic_key(memory) for memory in candidates]
+        if len(set(source_ids)) != len(source_ids):
+            rows_with_duplicate_source_ids += 1
+        if len(set(semantic_keys)) != len(semantic_keys):
+            rows_with_duplicate_semantics += 1
+            semantic_duplicate_count += len(semantic_keys) - len(set(semantic_keys))
+        selected_source_id = record.get("selected_memory_id")
+        if sum(source_id == selected_source_id for source_id in source_ids) > 1:
+            ambiguous_selected_source_ids += 1
+    return {
+        "status": "ok",
+        "dataset_version": DATASET_VERSION,
+        "source_bundle": "Alps_data_final_v4",
+        "files": files,
+        "annotations": {
+            "description": annotations.get("description"),
+            "total_sessions": annotations.get("total_sessions"),
+            "annotation_rows": len(annotation_rows),
+            "task_counts": dict(sorted(Counter(row.get("task") for row in annotation_rows).items())),
+            "privacy_boundary": (
+                "Raw annotations are source-only because they include information used "
+                "to construct hidden test references."
+            ),
+        },
+        "task3_normalization": {
+            "source_rows_with_duplicate_memory_ids": rows_with_duplicate_source_ids,
+            "source_rows_with_duplicate_memory_semantics": rows_with_duplicate_semantics,
+            "source_semantic_duplicate_count": semantic_duplicate_count,
+            "source_rows_with_ambiguous_selected_memory_id": ambiguous_selected_source_ids,
+            "published_candidate_count_per_row": 101,
+            "published_candidate_id_policy": "row_local_unique_v4",
+            "repair": (
+                "Deduplicate by label/value, preserve source_memory_id, and "
+                "deterministically fill from the v4 Task 1 memory pool."
+            ),
+        },
+    }
+
+
 def _source_dataset_root(alps_data_root: Path) -> Path:
     return alps_data_root / SOURCE_DATASET_ROOT
 
@@ -67,14 +177,30 @@ def _task2_source_path(alps_data_root: Path) -> Path:
         scored_paths = sorted(results_root.rglob("*scored.jsonl"))
         if scored_paths:
             return scored_paths[0]
-    return _source_dataset_root(alps_data_root) / "task2" / "task2_dataset.jsonl"
+    return _source_file(
+        alps_data_root,
+        "task2_dataset.jsonl",
+        *SOURCE_DATASET_ROOT.parts,
+        "task2",
+        "task2_dataset.jsonl",
+    )
 
 
 def _task3_source_path(alps_data_root: Path, *, distractors: int) -> Path:
-    return _source_dataset_root(alps_data_root) / "task3" / f"task3_dataset_d{distractors}.jsonl"
+    filename = f"task3_dataset_d{distractors}.jsonl"
+    return _source_file(
+        alps_data_root,
+        filename,
+        *SOURCE_DATASET_ROOT.parts,
+        "task3",
+        filename,
+    )
 
 
 def _task4_source_paths(alps_data_root: Path, *, track_name: str) -> list[Path]:
+    if _is_v4_source(alps_data_root):
+        ability = _track_name_to_task4_ability(track_name)
+        return [alps_data_root / f"{ability}.json"]
     if track_name == "task4_ability5":
         return [
             _source_dataset_root(alps_data_root) / "task4" / "ability5_ei" / filename
@@ -213,6 +339,37 @@ def load_task1_authoritative_pairs() -> list[tuple[dict[str, Any], dict[str, Any
     alps_data_root = resolve_alps_data_root()
     if alps_data_root is None:
         return None
+
+    v4_source_path = alps_data_root / "task1_dataset.jsonl"
+    if v4_source_path.is_file():
+        pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
+        for row in read_jsonl(v4_source_path):
+            session_id = str(row.get("session_id") or "")
+            if not session_id:
+                raise ValueError(f"Task 1 v4 row is missing session_id in {v4_source_path}")
+            sessions = row.get("sessions") or []
+            input_row = {
+                "benchmark_id": session_id,
+                "task": "task1",
+                "session_id": session_id,
+                "canonical_id": session_id,
+                "stratum": "UNKNOWN",
+                "input": {
+                    "line_index": row.get("line_index"),
+                    "sessions": sessions,
+                    "dialogue": _task1_dialogue_from_sessions(sessions),
+                    "metadata": {"source_dataset_file": "task1_dataset.jsonl"},
+                },
+            }
+            reference_row = {
+                "benchmark_id": session_id,
+                "task": "task1",
+                "session_id": session_id,
+                "canonical_id": session_id,
+                "gold": {"memory_items": row.get("memory_items") or []},
+            }
+            pairs.append((input_row, reference_row))
+        return pairs
 
     manifest_path = _task1_manifest_path(alps_data_root)
     output_split_dir = _task1_output_split_dir(alps_data_root)
@@ -361,7 +518,10 @@ def _write_release_pairs(
     template_track_name: str | None = None,
     example_count: int = TASK1_EXAMPLE_COUNT,
 ) -> dict[str, int]:
-    split_ids = _load_release_split_ids(template_track_name or track_name)
+    alps_data_root = resolve_alps_data_root()
+    split_ids = None
+    if alps_data_root is None or not _is_v4_source(alps_data_root):
+        split_ids = _load_release_split_ids(template_track_name or track_name)
     if split_ids is None:
         examples = pairs[:example_count]
         partitioned = partition_public_pairs(pairs)
@@ -439,7 +599,8 @@ def load_task2_authoritative_pairs() -> list[tuple[dict[str, Any], dict[str, Any
     if not source_path.exists():
         return None
 
-    metadata_by_id = _load_release_track_metadata(TASK2_TRACK_NAME)
+    v4_source = _is_v4_source(alps_data_root)
+    metadata_by_id = {} if v4_source else _load_release_track_metadata(TASK2_TRACK_NAME)
     pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
     for raw_row in read_jsonl(source_path):
         row = raw_row.get("entry") if isinstance(raw_row.get("entry"), Mapping) else raw_row
@@ -455,7 +616,11 @@ def load_task2_authoritative_pairs() -> list[tuple[dict[str, Any], dict[str, Any
             "benchmark_id": benchmark_id,
             "task": "task2",
             "session_id": _metadata_value(benchmark_id, metadata_by_id, "session_id", session_id),
-            "canonical_id": _metadata_value(benchmark_id, metadata_by_id, "canonical_id", session_id),
+            "canonical_id": (
+                session_id
+                if v4_source
+                else _metadata_value(benchmark_id, metadata_by_id, "canonical_id", session_id)
+            ),
             "stratum": _metadata_value(benchmark_id, metadata_by_id, "stratum", "UNKNOWN"),
             "input": {
                 "record_id": row.get("record_id"),
@@ -479,6 +644,94 @@ def load_task2_authoritative_pairs() -> list[tuple[dict[str, Any], dict[str, Any
     return pairs
 
 
+def _task3_semantic_key(memory: Mapping[str, Any]) -> tuple[str, str]:
+    return (str(memory.get("label") or "").strip(), str(memory.get("value") or "").strip())
+
+
+def _task3_v4_fill_pool(alps_data_root: Path) -> list[dict[str, Any]]:
+    task1_path = alps_data_root / "task1_dataset.jsonl"
+    if not task1_path.is_file():
+        return []
+    by_key: dict[tuple[str, str], dict[str, Any]] = {}
+    for row in read_jsonl(task1_path):
+        for memory in row.get("memory_items") or []:
+            key = _task3_semantic_key(memory)
+            if not all(key) or key in by_key:
+                continue
+            by_key[key] = {
+                "source_memory_id": memory.get("memory_id"),
+                "label": memory.get("label"),
+                "value": memory.get("value"),
+            }
+    sorted_keys = sorted(
+        by_key,
+        key=lambda item: hashlib.sha256(repr(item).encode()).hexdigest(),
+    )
+    return [by_key[key] for key in sorted_keys]
+
+
+def _normalize_task3_v4_candidates(
+    *,
+    benchmark_id: str,
+    record: Mapping[str, Any],
+    fill_pool: Sequence[Mapping[str, Any]],
+    distractors: int,
+) -> tuple[list[dict[str, Any]], str, dict[str, Any]]:
+    target = record.get("selected_memory") or {}
+    target_key = _task3_semantic_key(target)
+    expected_count = distractors + 1
+    unique: dict[tuple[str, str], dict[str, Any]] = {}
+
+    for memory in record.get("candidate_memories") or []:
+        key = _task3_semantic_key(memory)
+        if not all(key) or key in unique:
+            continue
+        unique[key] = {
+            "source_memory_id": memory.get("memory_id"),
+            "label": memory.get("label"),
+            "value": memory.get("value"),
+        }
+
+    if target_key not in unique:
+        raise ValueError(f"Task 3 target memory is absent from candidates for {benchmark_id}")
+
+    if len(unique) < expected_count and fill_pool:
+        start = int(hashlib.sha256(benchmark_id.encode()).hexdigest(), 16) % len(fill_pool)
+        for offset in range(len(fill_pool)):
+            memory = fill_pool[(start + offset) % len(fill_pool)]
+            key = _task3_semantic_key(memory)
+            if not all(key) or key in unique:
+                continue
+            unique[key] = dict(memory)
+            if len(unique) == expected_count:
+                break
+
+    if len(unique) < expected_count:
+        raise ValueError(
+            f"Unable to construct {expected_count} unique Task 3 candidates "
+            f"for {benchmark_id}; got {len(unique)}"
+        )
+
+    normalized: list[dict[str, Any]] = []
+    selected_id = ""
+    selected_memory: dict[str, Any] = {}
+    for index, (key, memory) in enumerate(list(unique.items())[:expected_count]):
+        normalized_memory = {
+            "memory_id": f"c{index:03d}",
+            "source_memory_id": memory.get("source_memory_id"),
+            "label": memory.get("label"),
+            "value": memory.get("value"),
+        }
+        normalized.append(normalized_memory)
+        if key == target_key:
+            selected_id = normalized_memory["memory_id"]
+            selected_memory = normalized_memory
+
+    if not selected_id:
+        raise ValueError(f"Task 3 target was dropped while normalizing candidates for {benchmark_id}")
+    return normalized, selected_id, selected_memory
+
+
 def load_task3_authoritative_pairs(*, distractors: int) -> list[tuple[dict[str, Any], dict[str, Any]]] | None:
     alps_data_root = resolve_alps_data_root()
     if alps_data_root is None:
@@ -489,7 +742,9 @@ def load_task3_authoritative_pairs(*, distractors: int) -> list[tuple[dict[str, 
     if not source_path.exists():
         return None
 
-    metadata_by_id = _load_release_track_metadata("task3_d100")
+    v4_source = _is_v4_source(alps_data_root)
+    metadata_by_id = {} if v4_source else _load_release_track_metadata("task3_d100")
+    fill_pool = _task3_v4_fill_pool(alps_data_root) if v4_source else []
     pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
     seen_benchmark_ids: set[str] = set()
     for row in read_jsonl(source_path):
@@ -501,6 +756,16 @@ def load_task3_authoritative_pairs(*, distractors: int) -> list[tuple[dict[str, 
         if benchmark_id in seen_benchmark_ids:
             continue
         seen_benchmark_ids.add(benchmark_id)
+        candidate_memories = record.get("candidate_memories") or []
+        selected_memory_id = record.get("selected_memory_id")
+        selected_memory = record.get("selected_memory") or {}
+        if v4_source:
+            candidate_memories, selected_memory_id, selected_memory = _normalize_task3_v4_candidates(
+                benchmark_id=benchmark_id,
+                record=record,
+                fill_pool=fill_pool,
+                distractors=level,
+            )
         input_row = {
             "benchmark_id": benchmark_id,
             "task": "task3",
@@ -509,9 +774,12 @@ def load_task3_authoritative_pairs(*, distractors: int) -> list[tuple[dict[str, 
             "stratum": _metadata_value(benchmark_id, metadata_by_id, "stratum", "UNKNOWN"),
             "input": {
                 "dialogue": record.get("dialogue") or [],
-                "candidate_memories": record.get("candidate_memories") or [],
+                "candidate_memories": candidate_memories,
                 "query": record.get("query"),
-                "metadata": metadata,
+                "metadata": {
+                    **metadata,
+                    "candidate_id_policy": "row_local_unique_v4" if v4_source else "source",
+                },
             },
         }
         reference_row = {
@@ -520,8 +788,9 @@ def load_task3_authoritative_pairs(*, distractors: int) -> list[tuple[dict[str, 
             "session_id": input_row["session_id"],
             "canonical_id": input_row["canonical_id"],
             "gold": {
-                "selected_memory_id": record.get("selected_memory_id"),
-                "selected_memory": record.get("selected_memory") or {},
+                "selected_memory_id": selected_memory_id,
+                "selected_memory": selected_memory,
+                "source_selected_memory_id": record.get("selected_memory_id") if v4_source else None,
             },
         }
         pairs.append((input_row, reference_row))
@@ -565,7 +834,8 @@ def load_task4_authoritative_pairs(*, track_name: str) -> list[tuple[dict[str, A
     if any(not path.exists() for path in source_paths):
         return None
 
-    metadata_by_id = _load_release_track_metadata(track_name)
+    v4_source = _is_v4_source(alps_data_root)
+    metadata_by_id = {} if v4_source else _load_release_track_metadata(track_name)
     ability = _track_name_to_task4_ability(track_name)
     pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []
 
@@ -592,7 +862,11 @@ def load_task4_authoritative_pairs(*, track_name: str) -> list[tuple[dict[str, A
                 "task": "task4",
                 "ability": _metadata_value(benchmark_id, metadata_by_id, "ability", ability),
                 "session_id": _metadata_value(benchmark_id, metadata_by_id, "session_id", benchmark_id),
-                "canonical_id": _metadata_value(benchmark_id, metadata_by_id, "canonical_id", benchmark_id),
+                "canonical_id": (
+                    f"{benchmark_id}:task4"
+                    if v4_source
+                    else _metadata_value(benchmark_id, metadata_by_id, "canonical_id", benchmark_id)
+                ),
                 "stratum": _metadata_value(benchmark_id, metadata_by_id, "stratum", "UNKNOWN"),
                 "input": {
                     "query": primary_query,
@@ -600,7 +874,7 @@ def load_task4_authoritative_pairs(*, track_name: str) -> list[tuple[dict[str, A
                     "model_input": model_input,
                     "audit_context": {
                         "conversation": row.get("conversation") or [],
-                        "source_dataset_file": str(source_path),
+                        "source_dataset_file": source_path.name,
                     },
                 },
             }
@@ -759,21 +1033,23 @@ def _count_rows(path: Path) -> int:
 
 def _remove_legacy_task3_layout() -> None:
     for split in PUBLIC_SPLITS:
-        task3_root = BENCHMARK_DATA_ROOT / split / "task3"
-        if task3_root.exists():
-            shutil.rmtree(task3_root)
         for track_name in TASK3_PUBLIC_TRACK_NAMES:
             legacy_dir = BENCHMARK_DATA_ROOT / split / track_name
             if legacy_dir.exists():
                 shutil.rmtree(legacy_dir)
+        for level in UNRELEASED_V4_TASK3_DISTRACTOR_LEVELS:
+            unreleased_dir = BENCHMARK_DATA_ROOT / split / "task3" / f"d{level}"
+            if unreleased_dir.exists():
+                shutil.rmtree(unreleased_dir)
     hidden_root = REPO_ROOT / "hidden" / "private_gold" / "test"
-    task3_hidden_root = hidden_root / "task3"
-    if task3_hidden_root.exists():
-        shutil.rmtree(task3_hidden_root)
     for track_name in TASK3_PUBLIC_TRACK_NAMES:
         legacy_dir = hidden_root / track_name
         if legacy_dir.exists():
             shutil.rmtree(legacy_dir)
+    for level in UNRELEASED_V4_TASK3_DISTRACTOR_LEVELS:
+        unreleased_dir = hidden_root / "task3" / f"d{level}"
+        if unreleased_dir.exists():
+            shutil.rmtree(unreleased_dir)
 
 
 def _build_split_summary(split: str) -> Dict[str, Dict[str, int]]:
@@ -802,6 +1078,7 @@ def _build_split_manifest() -> Dict[str, Any]:
 
     return {
         "status": "ok",
+        "dataset_version": DATASET_VERSION,
         "source_split": "dev",
         "hash_salt": PUBLIC_HASH_SALT,
         "weights": PUBLIC_SPLIT_WEIGHTS,
@@ -849,6 +1126,8 @@ def _validate_split_leakage(splits: Sequence[str]) -> Dict[str, Any]:
 
 def build_public_data_layout(*, overwrite: bool = False) -> Dict[str, Any]:
     created: list[str] = []
+    alps_data_root = resolve_alps_data_root()
+    source_manifest = _build_v4_source_manifest(alps_data_root) if alps_data_root is not None else None
     _remove_legacy_task3_layout()
     task1_sync = sync_authoritative_task1_release()
     task2_sync = sync_authoritative_task2_release()
@@ -874,9 +1153,12 @@ def build_public_data_layout(*, overwrite: bool = False) -> Dict[str, Any]:
     raw_export_index_payload = {
         "status": "public-layout",
         "dataset_version": DATASET_VERSION,
-        "note": "The public repository no longer rebuilds from legacy intermediate directories. Canonical raw source remains under Alps_data_v1/.",
+        "source_bundle": "Alps_data_final_v4",
+        "note": "The committed public layout was generated from the cleaned v4 source bundle. The annotation audit file is intentionally excluded because it contains test-reference information.",
     }
     write_json(artifacts_dir / "raw_export_index.json", raw_export_index_payload)
+    if source_manifest is not None:
+        write_json(artifacts_dir / "source_bundle_manifest.json", source_manifest)
 
     build_summary = {
         "status": "ok",
@@ -919,6 +1201,8 @@ def build_public_data_layout(*, overwrite: bool = False) -> Dict[str, Any]:
         manifest["task3_authoritative_sync"] = task3_sync
     if task4_sync is not None:
         manifest["task4_authoritative_sync"] = task4_sync
+    if source_manifest is not None:
+        manifest["source_bundle_manifest"] = "benchmark_data/artifacts/source_bundle_manifest.json"
     write_json(artifacts_dir / "public_layout_manifest.json", manifest)
     return manifest
 
@@ -937,6 +1221,9 @@ def _validate_reference_pair(track_dir: Path) -> Dict[str, int]:
 
     input_rows = read_jsonl(model_input_path)
     reference_rows = read_jsonl(reference_output_path)
+
+    if track_name in V4_EMPTY_TRACK_NAMES and not input_rows and not reference_rows:
+        return {"input_rows": 0, "reference_rows": 0}
 
     _require(bool(input_rows), f"No rows found in {model_input_path}")
     _require(bool(reference_rows), f"No rows found in {reference_output_path}")
@@ -968,6 +1255,24 @@ def _validate_reference_pair(track_dir: Path) -> Dict[str, int]:
         has_candidates = any((row.get("input", {}).get("candidate_memories") or []) for row in input_rows)
         _require(has_query, f"Task3 input rows are all missing query in {track_dir}")
         _require(has_candidates, f"Task3 input rows are all empty candidate_memories in {track_dir}")
+        expected_candidates = int(track_name.rsplit("d", 1)[1]) + 1
+        reference_by_id = {row["benchmark_id"]: row for row in reference_rows}
+        for row in input_rows:
+            candidates = row.get("input", {}).get("candidate_memories") or []
+            candidate_ids = [item.get("memory_id") for item in candidates]
+            _require(
+                len(candidates) == expected_candidates,
+                f"Task3 row {row.get('benchmark_id')} has {len(candidates)} candidates; expected {expected_candidates}",
+            )
+            _require(
+                len(set(candidate_ids)) == len(candidate_ids),
+                f"Task3 row {row.get('benchmark_id')} has duplicate candidate memory IDs",
+            )
+            selected_id = reference_by_id[row["benchmark_id"]].get("gold", {}).get("selected_memory_id")
+            _require(
+                selected_id in candidate_ids,
+                f"Task3 selected memory {selected_id!r} is absent from candidates for {row.get('benchmark_id')}",
+            )
     if track_name.startswith("task4_"):
         has_query = any(bool(row.get("input", {}).get("query")) for row in input_rows)
         has_selected_memory = any((row.get("gold", {}).get("selected_memory") or {}) for row in reference_rows)
@@ -983,6 +1288,8 @@ def _validate_test_track(track_dir: Path) -> Dict[str, int]:
     _require(model_input_path.exists(), f"Missing model_input.jsonl in {track_dir}")
     _require(not reference_output_path.exists(), f"Public test track must not expose reference_output.jsonl in {track_dir}")
     input_rows = read_jsonl(model_input_path)
+    if track_name in V4_EMPTY_TRACK_NAMES and not input_rows:
+        return {"input_rows": 0}
     if track_name == "task1":
         has_dialogue = any((row.get("input", {}).get("dialogue") or []) for row in input_rows)
         _require(has_dialogue, f"Task1 test input rows are all empty dialogue in {track_dir}")
@@ -992,6 +1299,12 @@ def _validate_test_track(track_dir: Path) -> Dict[str, int]:
     if track_name.startswith("task3_d"):
         has_candidates = any((row.get("input", {}).get("candidate_memories") or []) for row in input_rows)
         _require(has_candidates, f"Task3 test input rows are all empty candidate_memories in {track_dir}")
+        expected_candidates = int(track_name.rsplit("d", 1)[1]) + 1
+        for row in input_rows:
+            candidates = row.get("input", {}).get("candidate_memories") or []
+            candidate_ids = [item.get("memory_id") for item in candidates]
+            _require(len(candidates) == expected_candidates, f"Unexpected Task3 candidate count in {track_dir}")
+            _require(len(set(candidate_ids)) == len(candidate_ids), f"Duplicate Task3 candidate IDs in {track_dir}")
     if track_name.startswith("task4_"):
         has_query = any(bool(row.get("input", {}).get("query")) for row in input_rows)
         _require(has_query, f"Task4 test input rows are all missing query in {track_dir}")

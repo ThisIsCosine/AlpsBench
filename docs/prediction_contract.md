@@ -133,12 +133,14 @@ Public prediction row:
 
 Task 3 notes:
 
-- the same prediction schema applies to every released Task 3 track:
-  `task3_d100`, `task3_d300`, `task3_d500`, `task3_d700`, and `task3_d1000`
+- v4 releases only `task3_d100`
 - `answer` is the model's natural-language answer to the query
 - `reason` is the model's explanation of why that memory was used
 - `selected_memory_id` should point to one of the candidate memories from the
   input row
+- v4 candidate `memory_id` values are stable row-local IDs (`c000` through
+  `c100`); `source_memory_id` preserves the source bundle's non-unique ID for
+  auditability
 - for public scoring, `selected_memory_id` is the decisive field
 
 ## Task 4 Ability 1
@@ -203,7 +205,8 @@ Ability 4 uses the same output format:
 
 ## Task 4 Ability 5
 
-Ability 5 uses the same output format:
+Ability 5 reserves the same output format, but the v4 source file is empty and
+there are no rows to evaluate:
 
 ```json
 {

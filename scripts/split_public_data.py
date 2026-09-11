@@ -15,16 +15,27 @@ SRC_ROOT = REPO_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from benchmark.data import PUBLIC_TRACK_NAMES, load_authoritative_public_pairs  # noqa: E402
+from benchmark.data import (  # noqa: E402
+    DATASET_VERSION,
+    PUBLIC_HASH_SALT,
+    PUBLIC_TRACK_NAMES,
+    load_authoritative_public_pairs,
+)
 from benchmark.reports import read_jsonl, write_json, write_jsonl  # noqa: E402
 
 
 SOURCE_SPLIT = "dev"
 PUBLIC_BENCHMARK_ROOT = REPO_ROOT / "benchmark_data"
 HIDDEN_GOLD_ROOT = REPO_ROOT / "hidden" / "private_gold" / "test"
-HASH_SALT = "alpsbench-public-split-v1"
+HASH_SALT = PUBLIC_HASH_SALT
 SPLIT_ORDER = ("dev", "validation", "test")
 SPLIT_WEIGHTS = {"dev": 1, "validation": 1, "test": 3}
+
+
+def _track_relpath(track_name: str) -> Path:
+    if track_name.startswith("task3_d"):
+        return Path("task3") / track_name.split("_", 1)[1]
+    return Path(track_name)
 
 
 def _hash_rank(benchmark_id: str) -> str:
@@ -87,10 +98,11 @@ def _load_source_rows(track_name: str) -> tuple[list[dict[str, Any]], list[dict[
             [reference_row for _, reference_row in authoritative_pairs],
         )
 
-    dev_track_dir = PUBLIC_BENCHMARK_ROOT / "dev" / track_name
-    validation_track_dir = PUBLIC_BENCHMARK_ROOT / "validation" / track_name
-    test_track_dir = PUBLIC_BENCHMARK_ROOT / "test" / track_name
-    hidden_gold_track_dir = HIDDEN_GOLD_ROOT / track_name
+    track_relpath = _track_relpath(track_name)
+    dev_track_dir = PUBLIC_BENCHMARK_ROOT / "dev" / track_relpath
+    validation_track_dir = PUBLIC_BENCHMARK_ROOT / "validation" / track_relpath
+    test_track_dir = PUBLIC_BENCHMARK_ROOT / "test" / track_relpath
+    hidden_gold_track_dir = HIDDEN_GOLD_ROOT / track_relpath
 
     if (
         (validation_track_dir / "model_input.jsonl").exists()
@@ -130,6 +142,7 @@ def split_public_data(*, force: bool = False, track_names: list[str] | None = No
 
     summary: dict[str, Any] = {
         "status": "ok",
+        "dataset_version": DATASET_VERSION,
         "source_split": SOURCE_SPLIT,
         "hash_salt": HASH_SALT,
         "weights": SPLIT_WEIGHTS,
@@ -137,14 +150,14 @@ def split_public_data(*, force: bool = False, track_names: list[str] | None = No
     }
 
     for track_name in selected_tracks:
-        source_track_dir = source_root / track_name
+        track_relpath = _track_relpath(track_name)
         inputs, references = _load_source_rows(track_name)
         partitions = _partition_pairs(inputs, references)
 
-        dev_track_dir = source_root / track_name
-        validation_track_dir = validation_root / track_name
-        test_track_dir = test_root / track_name
-        hidden_gold_track_dir = HIDDEN_GOLD_ROOT / track_name
+        dev_track_dir = source_root / track_relpath
+        validation_track_dir = validation_root / track_relpath
+        test_track_dir = test_root / track_relpath
+        hidden_gold_track_dir = HIDDEN_GOLD_ROOT / track_relpath
 
         _reset_track_dir(dev_track_dir)
         _reset_track_dir(validation_track_dir)

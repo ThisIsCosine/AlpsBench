@@ -16,9 +16,9 @@ For Task 4 specifically:
 - `task4_ability2`
 - `task4_ability3`
 - `task4_ability4`
-- `task4_ability5`
+- `task4_ability5` (reserved; empty and unscored in v4)
 
-Each ability is scored, ranked, and compared independently.
+Each populated ability is scored, ranked, and compared independently.
 
 ## Table Aggregation Policy
 
