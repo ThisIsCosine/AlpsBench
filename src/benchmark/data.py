@@ -1186,12 +1186,18 @@ def build_public_data_layout(*, overwrite: bool = False) -> Dict[str, Any]:
     hidden_gold_root.mkdir(parents=True, exist_ok=True)
     write_json(hidden_gold_root / "split_manifest.json", split_manifest)
 
+    manifest_path = artifacts_dir / "public_layout_manifest.json"
+    previous_manifest: dict[str, Any] = {}
+    if manifest_path.is_file():
+        loaded_manifest = read_json(manifest_path)
+        if isinstance(loaded_manifest, dict) and loaded_manifest.get("dataset_version") == DATASET_VERSION:
+            previous_manifest = loaded_manifest
+
     manifest = {
         "status": "ok",
         "dataset_version": DATASET_VERSION,
         "created_dirs": sorted(set(created)),
         "public_data_is_canonical": True,
-        "overwrite_requested": overwrite,
     }
     if task1_sync is not None:
         manifest["task1_authoritative_sync"] = task1_sync
@@ -1203,7 +1209,17 @@ def build_public_data_layout(*, overwrite: bool = False) -> Dict[str, Any]:
         manifest["task4_authoritative_sync"] = task4_sync
     if source_manifest is not None:
         manifest["source_bundle_manifest"] = "benchmark_data/artifacts/source_bundle_manifest.json"
-    write_json(artifacts_dir / "public_layout_manifest.json", manifest)
+    else:
+        for key in (
+            "task1_authoritative_sync",
+            "task2_authoritative_sync",
+            "task3_authoritative_sync",
+            "task4_authoritative_sync",
+            "source_bundle_manifest",
+        ):
+            if key in previous_manifest:
+                manifest[key] = previous_manifest[key]
+    write_json(manifest_path, manifest)
     return manifest
 
 

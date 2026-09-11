@@ -37,7 +37,6 @@
     "benchmark_data/validation/task4_ability5"
   ],
   "public_data_is_canonical": true,
-  "overwrite_requested": true,
   "task1_authoritative_sync": {
     "status": "synced",
     "source": "authoritative_task1_pool",
