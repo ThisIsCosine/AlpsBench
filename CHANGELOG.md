@@ -14,6 +14,12 @@ All notable public benchmark-surface changes should be recorded here.
 
 ## Unreleased
 
+- restored the maintainer's original Task 1 personalized-memory extraction prompt
+- added a configurable Task 1 HTTP adapter and mock-API integration tests
+- documented the distinction between extraction, public proxy scoring, and the
+  unavailable legacy curator/judge implementation
+- fixed test collection when invoking `pytest` directly and in GitHub Actions
+
 - clarified that `benchmark_data/` is the full public `v1` benchmark release
 - documented data provenance, data-usage boundary, and citation path
 - documented Task 3 paper-reported metrics versus the released local proxy

@@ -94,6 +94,11 @@ such as:
 
 ## Task 1: Memory Extraction
 
+The original extraction instruction is now available at
+[`prompts/task1_extract.txt`](../prompts/task1_extract.txt), with a runnable
+adapter described in [Task 1 extraction](task1_extraction.md). The restored
+prompt does not restore the legacy curator or LLM judge described below.
+
 ### What the model receives
 
 Legacy evaluator input is the dialogue only. The extraction instruction is

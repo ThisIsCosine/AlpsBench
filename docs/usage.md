@@ -58,6 +58,11 @@ python scripts/evaluate.py --task task2 --split dev --predictions my_task2_predi
 
 ### 2. External Adapter Program
 
+For Task 1, a working extractor is included at
+`adapter_example/task1_api_adapter.py`. It uses the maintainer's original
+personalized-memory prompt. Follow [Task 1 extraction](task1_extraction.md) to
+set the endpoint, model, and key, then use it with `--predict-program`.
+
 Use this when you want AlpsBench to call your model row by row.
 
 ```bash

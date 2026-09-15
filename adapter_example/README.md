@@ -1,8 +1,13 @@
 # Adapter Example
 
-This directory is a standalone example for AlpsBench `--predict-program`.
+This directory contains adapters for AlpsBench `--predict-program`.
 
-It does not depend on any internal repo modules. The adapter:
+- `task1_api_adapter.py`: real Task 1 extraction using the original prompt and a
+  configurable HTTP model endpoint. See [setup and usage](../docs/task1_extraction.md).
+- `minimal_adapter.py`: standalone stubs illustrating the input/output contract
+  for all four tasks. Its Task 1/2 functions intentionally return empty memories.
+
+The minimal adapter does not depend on any internal repo modules. It:
 
 - reads one JSON row from `stdin`
 - writes one prediction JSON row to `stdout`

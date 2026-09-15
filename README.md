@@ -121,6 +121,18 @@ For `examples`, `dev`, and `validation`, `scripts/evaluate.py` returns public lo
 
 ## 🔌 Adapter Workflow
 
+Task 1 includes the original personalized-memory extraction prompt and a
+working API adapter. Set `ALPS_API_URL` (the full chat-completions endpoint),
+`ALPS_MODEL`, and `ALPS_API_KEY`, then run:
+
+```bash
+python scripts/evaluate.py --task task1 --split examples --limit 2 --predict-program python --predict-arg adapter_example/task1_api_adapter.py --output-dir runs/task1-api-examples
+```
+
+See [Task 1 extraction](docs/task1_extraction.md) for configuration, the
+[original prompt](prompts/task1_extract.txt), and scoring limitations. This
+adapter makes real model calls; `--oracle` only checks the evaluation pipeline.
+
 The public CLI is provider-agnostic. If you want AlpsBench to call your model directly, use `--predict-program` with repeated `--predict-arg`.
 
 Example:

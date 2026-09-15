@@ -23,4 +23,4 @@ jobs:
       - name: Smoke examples
         run: python scripts/smoke_examples.py
       - name: Run tests
-        run: pytest
+        run: python -m pytest
